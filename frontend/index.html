@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Control System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main View -->
+        <div id="main-view" class="view active">
+            <div class="card">
+                <div class="card-header">
+                    <h2> LED Control System</h2>
+                </div>
+                <div class="card-content">
+                    <div class="section">
+                        <h3>Available Devices</h3>
+                        <div id="devices-container">
+                            <div id="loading-devices">Loading devices...</div>
+                            <div id="no-devices" class="hidden">No devices found</div>
+                            <div id="device-list" class="hidden"></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="button-group">
+                            <button id="connect-btn" class="btn primary">Connect</button>
+                            <button id="disconnect-btn" class="btn secondary">Disconnect</button>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="status-box">
+                            <p>Status: <span id="connection-status">Disconnected</span></p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="button-group vertical">
+                            <button id="grid-config-btn" class="btn primary" disabled>Configure Grid</button>
+                            <button id="color-control-btn" class="btn primary" disabled>Color Control</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Configuration View -->
+        <div id="grid-view" class="view">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Grid Configuration</h2>
+                    <button id="grid-back-btn" class="btn icon-btn">←</button>
+                </div>
+                <div class="card-content">
+                    <div class="section">
+                        <div class="grid-controls">
+                            <div class="form-group">
+                                <label for="rows-input">Rows</label>
+                                <input type="number" id="rows-input" min="1" max="10" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="columns-input">Columns</label>
+                                <input type="number" id="columns-input" min="1" max="10" value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Connected Device: <span id="selected-device-display"></span></h3>
+                        <p>Click on a cell to assign the device</p>
+                        <div id="grid-container" class="grid-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Control View -->
+        <div id="color-view" class="view">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Color Control</h2>
+                    <button id="color-back-btn" class="btn icon-btn">←</button>
+                </div>
+                <div class="card-content">
+                    <div class="section">
+                        <h3>Connected Device: <span id="color-device-display"></span></h3>
+                        <p>Click on a cell to set its color</p>
+                        <div id="color-grid-container" class="grid-container"></div>
+                    </div>
+
+                    <div id="color-picker-section" class="section hidden">
+                        <div class="form-group">
+                            <label for="color-picker">Select Color for Cell [<span id="selected-cell"></span>]</label>
+                            <div class="color-picker-container">
+                                <input type="color" id="color-picker" value="#ff0000">
+                                <span id="color-value">#ff0000</span>
+                            </div>
+                            <div class="button-group mt-10">
+                                <button id="apply-color-btn" class="btn primary">Apply Color</button>
+                                <button id="reset-color-btn" class="btn warning">Reset Color</button>
+                                <button id="cancel-color-btn" class="btn secondary">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
