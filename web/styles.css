@@ -1,0 +1,372 @@
+/* Podstawowe style */
+:root {
+  --primary: #4a6cf7;
+  --accent: #28a745;
+  --dark: #343a40;
+  --light: #f8f9fa;
+  --gray: #e9ecef;
+  --border: #dee2e6;
+  --text: #212529;
+  --radius: 4px;
+  --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+  --grid-cell-size: 40px;  /* Zwiększony domyślny rozmiar komórki dla Grid Editor */
+  --pixel-cell-size: 40px; /* Zwiększony domyślny rozmiar komórki dla Pixel Control */
+  --cell-gap: 2px;         /* Odstęp między komórkami */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--gray);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Kontener aplikacji */
+.app-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Pasek boczny */
+.sidebar {
+  width: 220px;
+  background-color: var(--dark);
+  color: white;
+  padding: 1rem 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: bold;
+}
+
+.logo i {
+  margin-right: 0.5rem;
+  color: var(--primary);
+}
+
+.nav-links {
+  list-style: none;
+}
+
+.nav-item {
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid var(--primary);
+}
+
+.nav-item i {
+  margin-right: 0.8rem;
+  width: 20px;
+  text-align: center;
+}
+
+/* Główna zawartość */
+.content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Sekcje stron */
+.page {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.page.active {
+  display: block;
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: var(--text);
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 0.5rem;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+/* Karty */
+.card {
+  background-color: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Elementy formularza */
+input, select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.input-group {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.input-group input {
+  flex: 1;
+  margin-bottom: 0;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.control-group {
+  margin-bottom: 1rem;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+/* Przyciski */
+.btn {
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn.primary {
+  background-color: var(--primary);
+}
+
+.btn.accent {
+  background-color: var(--accent);
+}
+
+.btn i {
+  margin-right: 0.4rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Lista urządzeń */
+.device-list-container {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+
+#adopted-devices-list li {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Grid Editor */
+.grid-controls {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Kontener dla gridu - zapewnia centrowanie i przewijanie */
+.grid-container {
+  width: 100%;
+  height: 450px; /* Zwiększona wysokość */
+  overflow: auto;
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--light);
+  padding: 20px; /* Dodane padding */
+}
+
+.grid-preview {
+  display: grid;
+  gap: var(--cell-gap);
+  margin: 0 auto;
+}
+
+.grid-cell {
+  background-color: var(--gray);
+  border: 1px solid var(--border);
+  min-width: 40px; /* Minimalny rozmiar komórki */
+  min-height: 40px;
+}
+
+/* Pixel Control */
+.pixel-editor {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.main-card {
+  flex: 1;
+}
+
+.tools-card {
+  width: 220px;
+}
+
+/* Kontener dla pikseli - zapewnia centrowanie i przewijanie */
+.pixel-container {
+  width: 100%;
+  height: 450px; /* Zwiększona wysokość */
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--light);
+  padding: 20px; /* Dodane padding */
+}
+
+.pixel-grid {
+  display: grid;
+  gap: var(--cell-gap);
+  margin: 0 auto;
+}
+
+.pixel {
+  background-color: white;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  min-width: 40px; /* Minimalny rozmiar piksela */
+  min-height: 40px;
+}
+
+.tool-section {
+  margin-bottom: 1.5rem;
+}
+
+#color-picker {
+  width: 100%;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border);
+}
+
+/* Stopka */
+footer {
+  background-color: var(--dark);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.active-device span:first-child {
+  color: #adb5bd;
+  margin-right: 0.5rem;
+}
+
+#current-device {
+  font-weight: 500;
+  color: var(--primary);
+}
+
+/* Animacje */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(10px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Klasa dla animacji połączenia */
+.connected {
+  animation: pulse 1.5s ease;
+}
+
+@keyframes pulse {
+  0% { color: var(--primary); }
+  50% { color: var(--accent); }
+  100% { color: var(--primary); }
+}
+
+/* Media queries dla responsywności */
+@media (max-width: 1200px) {
+  .pixel-editor {
+      flex-direction: column;
+  }
+  
+  .tools-card {
+      width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+      width: 180px;
+  }
+  
+  .grid-controls {
+      flex-direction: column;
+      gap: 0.5rem;
+  }
+}
