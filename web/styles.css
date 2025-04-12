@@ -10,9 +10,9 @@
   --radius: 4px;
   --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
-  --grid-cell-size: 40px;  /* Zwiększony domyślny rozmiar komórki dla Grid Editor */
+  --grid-cell-size: 40px; /* Zwiększony domyślny rozmiar komórki dla Grid Editor */
   --pixel-cell-size: 40px; /* Zwiększony domyślny rozmiar komórki dla Pixel Control */
-  --cell-gap: 2px;         /* Odstęp między komórkami */
+  --cell-gap: 2px; /* Odstęp między komórkami */
 }
 
 * {
@@ -22,7 +22,7 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--gray);
   color: var(--text);
   height: 100vh;
@@ -132,7 +132,8 @@ h3 {
 }
 
 /* Elementy formularza */
-input, select {
+input,
+select {
   width: 100%;
   padding: 0.5rem;
   margin-bottom: 1rem;
@@ -329,12 +330,12 @@ footer {
 /* Animacje */
 @keyframes fadeIn {
   from {
-      opacity: 0;
-      transform: translateY(10px);
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
-      opacity: 1;
-      transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -344,29 +345,35 @@ footer {
 }
 
 @keyframes pulse {
-  0% { color: var(--primary); }
-  50% { color: var(--accent); }
-  100% { color: var(--primary); }
+  0% {
+    color: var(--primary);
+  }
+  50% {
+    color: var(--accent);
+  }
+  100% {
+    color: var(--primary);
+  }
 }
 
 /* Media queries dla responsywności */
 @media (max-width: 1200px) {
   .pixel-editor {
-      flex-direction: column;
+    flex-direction: column;
   }
-  
+
   .tools-card {
-      width: 100%;
+    width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .sidebar {
-      width: 180px;
+    width: 180px;
   }
-  
+
   .grid-controls {
-      flex-direction: column;
-      gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

@@ -1,158 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Device Control</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
     <!-- Font Awesome dla ikon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script type="text/javascript" src="/eel.js"></script>
+  </head>
+  <body>
     <!-- Główny kontener aplikacji -->
     <div class="app-container">
-        <!-- Menu nawigacyjne -->
-        <nav class="sidebar">
-            <div class="logo">
-                <i class="fas fa-microchip"></i>
-                <span>Device Control</span>
+      <!-- Menu nawigacyjne -->
+      <nav class="sidebar">
+        <div class="logo">
+          <i class="fas fa-microchip"></i>
+          <span>Device Control</span>
+        </div>
+        <ul class="nav-links">
+          <li class="nav-item active" data-target="main-menu">
+            <i class="fas fa-home"></i> Main Menu
+          </li>
+          <li class="nav-item" data-target="device-manager">
+            <i class="fas fa-server"></i> Device Manager
+          </li>
+          <li class="nav-item" data-target="grid-editor">
+            <i class="fas fa-th"></i> Grid Editor
+          </li>
+          <li class="nav-item" data-target="pixel-control">
+            <i class="fas fa-paint-brush"></i> Pixel Control
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Obszar głównej zawartości -->
+      <main class="content">
+        <!-- Sekcja Main Menu -->
+        <section id="main-menu" class="page active">
+          <h1>Main Menu</h1>
+          <div class="card">
+            <h2>Available Devices:</h2>
+            <select id="device-list">
+              <option value="">Select a device...</option>
+              <option value="device1">Device 1</option>
+              <option value="device2">Device 2</option>
+            </select>
+            <div class="button-row">
+              <button id="connect-btn" class="btn primary">
+                <i class="fas fa-plug"></i> Connect
+              </button>
+              <button id="disconnect-btn" class="btn">
+                <i class="fas fa-unlink"></i> Disconnect
+              </button>
             </div>
-            <ul class="nav-links">
-                <li class="nav-item active" data-target="main-menu">
-                    <i class="fas fa-home"></i> Main Menu
-                </li>
-                <li class="nav-item" data-target="device-manager">
-                    <i class="fas fa-server"></i> Device Manager
-                </li>
-                <li class="nav-item" data-target="grid-editor">
-                    <i class="fas fa-th"></i> Grid Editor
-                </li>
-                <li class="nav-item" data-target="pixel-control">
-                    <i class="fas fa-paint-brush"></i> Pixel Control
-                </li>
-            </ul>
-        </nav>
+            <button id="adopt-device-btn" class="btn accent">
+              <i class="fas fa-plus-circle"></i> Adopt Device
+            </button>
+          </div>
+        </section>
 
-        <!-- Obszar głównej zawartości -->
-        <main class="content">
-            <!-- Sekcja Main Menu -->
-            <section id="main-menu" class="page active">
-                <h1>Main Menu</h1>
-                <div class="card">
-                    <h2>Available Devices:</h2>
-                    <select id="device-list">
-                        <option value="">Select a device...</option>
-                        <option value="device1">Device 1</option>
-                        <option value="device2">Device 2</option>
-                    </select>
-                    <div class="button-row">
-                        <button id="connect-btn" class="btn primary">
-                            <i class="fas fa-plug"></i> Connect
-                        </button>
-                        <button id="disconnect-btn" class="btn">
-                            <i class="fas fa-unlink"></i> Disconnect
-                        </button>
-                    </div>
-                    <button id="adopt-device-btn" class="btn accent">
-                        <i class="fas fa-plus-circle"></i> Adopt Device
-                    </button>
-                </div>
-            </section>
+        <!-- Sekcja Device Manager -->
+        <section id="device-manager" class="page">
+          <h1>Device Manager</h1>
+          <div class="card">
+            <h2>Adopted Devices:</h2>
+            <div class="input-group">
+              <input
+                type="text"
+                id="device-name"
+                placeholder="Device name..."
+              />
+              <button id="save-as-btn" class="btn primary">
+                <i class="fas fa-save"></i> Save As
+              </button>
+            </div>
+            <button id="load-devices-btn" class="btn">
+              <i class="fas fa-download"></i> Load Devices
+            </button>
+            <div class="device-list-container">
+              <ul id="adopted-devices-list"></ul>
+            </div>
+          </div>
+        </section>
 
-            <!-- Sekcja Device Manager -->
-            <section id="device-manager" class="page">
-                <h1>Device Manager</h1>
-                <div class="card">
-                    <h2>Adopted Devices:</h2>
-                    <div class="input-group">
-                        <input type="text" id="device-name" placeholder="Device name...">
-                        <button id="save-as-btn" class="btn primary">
-                            <i class="fas fa-save"></i> Save As
-                        </button>
-                    </div>
-                    <button id="load-devices-btn" class="btn">
-                        <i class="fas fa-download"></i> Load Devices
-                    </button>
-                    <div class="device-list-container">
-                        <ul id="adopted-devices-list"></ul>
-                    </div>
-                </div>
-            </section>
+        <!-- Sekcja Grid Editor -->
+        <section id="grid-editor" class="page">
+          <h1>Grid Editor</h1>
+          <div class="card">
+            <h2>Create Grid:</h2>
+            <div class="grid-controls">
+              <div class="control-group">
+                <label for="columns">Columns:</label>
+                <input type="number" id="columns" min="1" value="5" />
+              </div>
+              <div class="control-group">
+                <label for="rows">Rows:</label>
+                <input type="number" id="rows" min="1" value="5" />
+              </div>
+            </div>
 
-            <!-- Sekcja Grid Editor -->
-            <section id="grid-editor" class="page">
-                <h1>Grid Editor</h1>
-                <div class="card">
-                    <h2>Create Grid:</h2>
-                    <div class="grid-controls">
-                        <div class="control-group">
-                            <label for="columns">Columns:</label>
-                            <input type="number" id="columns" min="1" value="5">
-                        </div>
-                        <div class="control-group">
-                            <label for="rows">Rows:</label>
-                            <input type="number" id="rows" min="1" value="5">
-                        </div>
-                    </div>
-                    
-                    <div class="grid-container">
-                        <div id="grid-preview" class="grid-preview"></div>
-                    </div>
-                    
-                    <div class="button-row">
-                        <button id="save-grid-btn" class="btn primary">
-                            <i class="fas fa-save"></i> Save Grid
-                        </button>
-                        <button id="load-grid-btn" class="btn">
-                            <i class="fas fa-folder-open"></i> Load Grid
-                        </button>
-                    </div>
-                </div>
-            </section>
+            <div class="grid-container">
+              <div id="grid-preview" class="grid-preview"></div>
+            </div>
 
-            <!-- Sekcja Pixel Control -->
-            <section id="pixel-control" class="page">
-                <h1>Pixel Control</h1>
-                <div class="pixel-editor">
-                    <div class="card main-card">
-                        <h2>Edit Pixels</h2>
-                        <div class="pixel-container">
-                            <div id="pixel-grid" class="pixel-grid"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="card tools-card">
-                        <h2>Tools:</h2>
-                        <div class="tool-section">
-                            <h3>Color</h3>
-                            <input type="color" id="color-picker" value="#ff0000">
-                        </div>
-                        
-                        <div class="tool-section">
-                            <button id="clear-btn" class="btn">Clear</button>
-                            <button id="fill-btn" class="btn accent">Fill</button>
-                        </div>
-                        
-                        <div class="tool-section">
-                            <h3>File:</h3>
-                            <button id="save-pixels-btn" class="btn primary">Save</button>
-                            <button id="load-pixels-btn" class="btn">Load</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
+            <div class="button-row">
+              <button id="save-grid-btn" class="btn primary">
+                <i class="fas fa-save"></i> Save Grid
+              </button>
+              <button id="load-grid-btn" class="btn">
+                <i class="fas fa-folder-open"></i> Load Grid
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sekcja Pixel Control -->
+        <section id="pixel-control" class="page">
+          <h1>Pixel Control</h1>
+          <div class="pixel-editor">
+            <div class="card main-card">
+              <h2>Edit Pixels</h2>
+              <div class="pixel-container">
+                <div id="pixel-grid" class="pixel-grid"></div>
+              </div>
+            </div>
+
+            <div class="card tools-card">
+              <h2>Tools:</h2>
+              <div class="tool-section">
+                <h3>Color</h3>
+                <input type="color" id="color-picker" value="#ff0000" />
+              </div>
+
+              <div class="tool-section">
+                <button id="clear-btn" class="btn">Clear</button>
+                <button id="fill-btn" class="btn accent">Fill</button>
+              </div>
+
+              <div class="tool-section">
+                <h3>File:</h3>
+                <button id="save-pixels-btn" class="btn primary">Save</button>
+                <button id="load-pixels-btn" class="btn">Load</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <!-- Stopka -->
     <footer>
-        <div class="active-device">
-            <span>Active Device:</span>
-            <span id="current-device">None</span>
-        </div>
-        <div class="app-info">Device Control v1.0</div>
+      <div class="active-device">
+        <span>Active Device:</span>
+        <span id="current-device">None</span>
+      </div>
+      <div class="app-info">Device Control v1.0</div>
     </footer>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
