@@ -9,7 +9,7 @@ eel.init("web")
  # App starts HERE
 if __name__ == "__main__":
     try:
-        eel.start('index.html', size=(screen.width, screen.height))
+        eel.start('index.html', size=(screen.width/2, screen.height/2))
     except (SystemExit, MemoryError, KeyboardInterrupt):
         pass
     

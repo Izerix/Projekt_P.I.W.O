@@ -289,6 +289,13 @@ select {
   margin: 0 auto;
 }
 
+.pixel-cell {
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  min-width: 40px; /* Minimalny rozmiar komórki */
+  min-height: 40px;
+}
+
 .pixel {
   background-color: white;
   border: 1px solid var(--border);
