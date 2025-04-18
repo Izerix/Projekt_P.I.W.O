@@ -19,6 +19,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const colorPicker = document.getElementById("color-picker");
   const fillBtn = document.getElementById("fill-btn");
   const clearBtn = document.getElementById("clear-btn");
+  const saveGridBtn = document.getElementById("save-pixels-btn");
+  const loadPixelsBtn = document.getElementById("load-pixels-btn");
 
   // ===== NAVIGATION =====
   navItems.forEach((item) => {
@@ -54,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Create grid cells
     for (let i = 0; i < rows * columns; i++) {
       const cell = document.createElement("div");
+      const color = "#ffffff";
       cell.className = "grid-cell";
       cell.dataset.index = i;
       gridPreview.appendChild(cell);
@@ -61,14 +64,11 @@ document.addEventListener("DOMContentLoaded", function () {
       gridData.push({
         index: i,
         class: "grid-cell",
+        color: color,
       });
     }
     updatePixelGrid();
   }
-
-  // Update grid when inputs change
-  columnsInput.addEventListener("input", generateGrid);
-  rowsInput.addEventListener("input", generateGrid);
 
   function updatePixelGrid() {
     // Get current values
@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     // Update data
     gridData[index].color = selectedColor;
-
     // Update pixel cell grid
     const pixelCell = document.querySelector(
       `.pixel-cell[data-index="${index}"]`
@@ -127,6 +126,89 @@ document.addEventListener("DOMContentLoaded", function () {
       pixelCell.style.backgroundColor = selectedColor;
     }
   }
+
+  function fillCells() {
+    gridData.forEach((el) => {
+      el.color = selectedColor;
+    });
+    document.querySelectorAll(`.pixel-cell`).forEach((el) => {
+      el.style.backgroundColor = selectedColor;
+    });
+  }
+
+  function clearCells() {
+    let clearColor = "#ffffff";
+    gridData.forEach((el) => {
+      el.color = clearColor;
+    });
+    document.querySelectorAll(`.pixel-cell`).forEach((el) => {
+      el.style.backgroundColor = clearColor;
+    });
+  }
+
+  function loadPixels(data) {
+    pixelGrid.innerHTML = "";
+
+    for (let i = 0; i < data.length; i++) {
+      const cell = document.createElement("div");
+      cell.className = data[i].class;
+      cell.dataset.index = data[i].index;
+      cell.style.backgroundColor = data[i].color;
+      pixelGrid.appendChild(cell);
+    }
+  }
+
+  // ===== ASYNC FUNCTIONS =====
+  async function savePixels() {
+    // TODO: Fix this it works not
+    const pixelData = [];
+    gridData.forEach((el) => {
+      pixelData.push({
+        index: el.index,
+        class: "pixel-cell",
+        color: el.color,
+      });
+    });
+    const json = JSON.stringify(pixelData);
+
+    const handle = await window.showSaveFilePicker({
+      suggestedName: "data.json",
+      types: [
+        {
+          description: "Data of the painted grid",
+          accept: { "application/json": [".json"] },
+        },
+      ],
+    });
+
+    const writable = await handle.createWritable();
+    await writable.write(json);
+    await writable.close();
+  }
+
+  async function getGridData() {
+    const [fileHandle] = await window.showOpenFilePicker({
+      types: [
+        {
+          accept: { "application/json": [".json"] },
+        },
+      ],
+    });
+
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    const loadedGridData = JSON.parse(text);
+    loadPixels(loadedGridData);
+  }
+
+  // ===== EVENT LISTENERS (buttons)=====
+  // Update grid when inputs change
+  columnsInput.addEventListener("input", generateGrid);
+  rowsInput.addEventListener("input", generateGrid);
+  fillBtn.addEventListener("click", fillCells);
+  clearBtn.addEventListener("click", clearCells);
+  saveGridBtn.addEventListener("click", savePixels);
+  loadPixelsBtn.addEventListener("click", getGridData);
 
   // ===== INITIAL FUNCTION CALLS =====
   // Generate initial grid
