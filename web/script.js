@@ -4,22 +4,34 @@ document.addEventListener("DOMContentLoaded", function () {
   let gridData = [];
   let isPainting = false;
   let selectedColor = "#ff0000";
+  const color = "#ffffff";
 
   // Navigation between elements in sidebar
   const navItems = document.querySelectorAll(".nav-item");
   const pages = document.querySelectorAll(".page");
 
+  // Main Menu constants
+  const connectBtn = document.getElementById("connect-btn");
+  const disconnectBtn = document.getElementById("disconnect-btn");
+  const adoptDeviceBtn = document.getElementById("adopt-device-btn");
+
+  // Device Manager constants
+  const saveAsBtn = document.getElementById("save-as-btn");
+  const loadDevicesBtn = document.getElementById("load-devices-btn");
+
   // Grid editor constants
   const columnsInput = document.getElementById("columns");
   const rowsInput = document.getElementById("rows");
   const gridPreview = document.getElementById("grid-preview");
+  const saveGridBtn = document.getElementById("save-grid-btn");
+  const loadGridBtn = document.getElementById("load-grid-btn");
 
   // Pixel Control constants
   const pixelGrid = document.getElementById("pixel-grid");
   const colorPicker = document.getElementById("color-picker");
   const fillBtn = document.getElementById("fill-btn");
   const clearBtn = document.getElementById("clear-btn");
-  const saveGridBtn = document.getElementById("save-pixels-btn");
+  const savePixelGridBtn = document.getElementById("save-pixels-btn");
   const loadPixelsBtn = document.getElementById("load-pixels-btn");
 
   // ===== NAVIGATION =====
@@ -56,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Create grid cells
     for (let i = 0; i < rows * columns; i++) {
       const cell = document.createElement("div");
-      const color = "#ffffff";
+
       cell.className = "grid-cell";
       cell.dataset.index = i;
       gridPreview.appendChild(cell);
@@ -87,24 +99,8 @@ document.addEventListener("DOMContentLoaded", function () {
       cell.dataset.index = i;
       cell.style.backgroundColor = gridData[i].color;
 
-      // Add mouse events for painting
-      cell.addEventListener("mousedown", function (e) {
-        e.preventDefault(); // Prevent text selection while dragging
-        isPainting = true;
-        const index = parseInt(this.dataset.index);
-        paintCell(index);
-      });
-
-      cell.addEventListener("mousemove", function () {
-        if (isPainting) {
-          const index = parseInt(this.dataset.index);
-          paintCell(index);
-        }
-      });
-
-      cell.addEventListener("mouseup", function () {
-        isPainting = false;
-      });
+      // Call mouse events function for painting
+      addPaintListeners(cell);
 
       pixelGrid.appendChild(cell);
     }
@@ -149,26 +145,73 @@ document.addEventListener("DOMContentLoaded", function () {
   function loadPixels(data) {
     pixelGrid.innerHTML = "";
 
-    for (let i = 0; i < data.length; i++) {
+    const totalCells = data.columns * data.rows;
+    const columns = data.columns;
+    const cells = data.cells;
+
+    pixelGrid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+
+    gridData = [];
+    for (let i = 0; i < totalCells; i++) {
+      gridData.push({
+        index: i,
+        class: "grid-cell",
+        color: color,
+      });
+    }
+
+    for (let i = 0; i < cells.length; i++) {
       const cell = document.createElement("div");
-      cell.className = data[i].class;
-      cell.dataset.index = data[i].index;
-      cell.style.backgroundColor = data[i].color;
+      cell.className = "pixel-cell";
+      cell.dataset.index = cells[i].index;
+      cell.style.backgroundColor = cells[i].color;
+
+      addPaintListeners(cell);
       pixelGrid.appendChild(cell);
     }
   }
 
-  // ===== ASYNC FUNCTIONS =====
-  async function savePixels() {
-    // TODO: Fix this it works not
-    const pixelData = [];
-    gridData.forEach((el) => {
-      pixelData.push({
-        index: el.index,
-        class: "pixel-cell",
-        color: el.color,
-      });
+  function addPaintListeners(cell) {
+    cell.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      isPainting = true;
+      const index = parseInt(this.dataset.index);
+      paintCell(index);
     });
+
+    cell.addEventListener("mousemove", function () {
+      if (isPainting) {
+        const index = parseInt(this.dataset.index);
+        paintCell(index);
+      }
+    });
+  }
+
+  // ===== ASYNC FUNCTIONS =====
+
+  async function saveDevices() {
+    console.log("TODO");
+  }
+
+  async function loadDevices() {
+    console.log("TODO");
+  }
+
+  async function saveGrid() {
+    console.log("TODO");
+  }
+
+  async function loadGrid() {
+    console.log("TODO");
+  }
+
+  async function savePixels() {
+    const pixelData = {
+      columns: parseInt(columnsInput.value),
+      rows: parseInt(rowsInput.value),
+      cells: gridData,
+    };
+
     const json = JSON.stringify(pixelData);
 
     const handle = await window.showSaveFilePicker({
@@ -207,8 +250,19 @@ document.addEventListener("DOMContentLoaded", function () {
   rowsInput.addEventListener("input", generateGrid);
   fillBtn.addEventListener("click", fillCells);
   clearBtn.addEventListener("click", clearCells);
-  saveGridBtn.addEventListener("click", savePixels);
+  savePixelGridBtn.addEventListener("click", savePixels);
   loadPixelsBtn.addEventListener("click", getGridData);
+  connectBtn.addEventListener("click", () => eel.connect_device());
+  disconnectBtn.addEventListener("click", () => eel.disconnect_device());
+  adoptDeviceBtn.addEventListener("click", () => eel.adopt_device());
+  saveAsBtn.addEventListener("click", saveDevices);
+  loadDevicesBtn.addEventListener("click", loadDevices);
+  saveGridBtn.addEventListener("click", saveGrid);
+  loadGridBtn.addEventListener("click", loadGrid);
+
+  document.addEventListener("mouseup", function () {
+    isPainting = false;
+  });
 
   // ===== INITIAL FUNCTION CALLS =====
   // Generate initial grid
