@@ -72,6 +72,16 @@ document.addEventListener("DOMContentLoaded", function () {
     eel.disconnect_device(deviceName)();
   }
 
+  function adopt_device() {
+    const deviceName = document.getElementById("current-device").innerHTML;
+    if (deviceName !== "None") {
+      const li = document.createElement("li");
+      li.textContent = deviceName;
+      adoptedDevicesList.appendChild(li);
+      eel.adopt_device(deviceName)();
+    }
+  }
+
   // ===== GRID EDITOR =====
   function generateGrid() {
     // Get current values
@@ -284,16 +294,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("mouseup", function () {
     isPainting = false;
   });
-
-  function adopt_device() {
-    const deviceName = document.getElementById("current-device").innerHTML;
-    if (deviceName !== "None") {
-      const li = document.createElement("li");
-      li.textContent = deviceName;
-      adoptedDevicesList.appendChild(li);
-      eel.adopt_device(deviceName)();
-    }
-  }
 
   // ===== INITIAL FUNCTION CALLS =====
   // Generate initial grid
