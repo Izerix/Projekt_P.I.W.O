@@ -7,16 +7,16 @@ print(screen)
 eel.init("web")
 
 @eel.expose
-def connect_device():
-    print("Device connected")
+def connect_device(n):
+    print("Device: " + n + " connected.")
     
 @eel.expose
-def disconnect_device():
-    print("Device disconnected")
+def disconnect_device(n):
+    print("Device: " + n + " disconnected.")
     
 @eel.expose
-def adopt_device():
-    print("Device adapted")
+def adopt_device(n):
+    print("Device: " + n + " adopted.")
 
  # App starts HERE
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Device Manager constants
   const saveAsBtn = document.getElementById("save-as-btn");
   const loadDevicesBtn = document.getElementById("load-devices-btn");
+  const adoptedDevicesList = document.getElementById("adopted-devices-list");
 
   // Grid editor constants
   const columnsInput = document.getElementById("columns");
@@ -50,6 +51,26 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ===== FUNCTIONS =====
+
+  // ===== MAIN MENU =====
+
+  function connect_device() {
+    const selectedValue = document.getElementById("device-list").value;
+    const currentDevice = document.getElementById("current-device");
+    currentDevice.innerHTML = selectedValue;
+
+    // Call the Python function with the selected value
+    eel.connect_device(selectedValue)();
+  }
+
+  function disconnect_device() {
+    const currentDevice = document.getElementById("current-device");
+    const deviceName = document.getElementById("current-device").innerHTML;
+    currentDevice.innerHTML = "None";
+
+    // Call the Python function with the selected value
+    eel.disconnect_device(deviceName)();
+  }
 
   // ===== GRID EDITOR =====
   function generateGrid() {
@@ -252,9 +273,9 @@ document.addEventListener("DOMContentLoaded", function () {
   clearBtn.addEventListener("click", clearCells);
   savePixelGridBtn.addEventListener("click", savePixels);
   loadPixelsBtn.addEventListener("click", getGridData);
-  connectBtn.addEventListener("click", () => eel.connect_device());
-  disconnectBtn.addEventListener("click", () => eel.disconnect_device());
-  adoptDeviceBtn.addEventListener("click", () => eel.adopt_device());
+  connectBtn.addEventListener("click", connect_device);
+  disconnectBtn.addEventListener("click", disconnect_device);
+  adoptDeviceBtn.addEventListener("click", adopt_device);
   saveAsBtn.addEventListener("click", saveDevices);
   loadDevicesBtn.addEventListener("click", loadDevices);
   saveGridBtn.addEventListener("click", saveGrid);
@@ -263,6 +284,16 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("mouseup", function () {
     isPainting = false;
   });
+
+  function adopt_device() {
+    const deviceName = document.getElementById("current-device").innerHTML;
+    if (deviceName !== "None") {
+      const li = document.createElement("li");
+      li.textContent = deviceName;
+      adoptedDevicesList.appendChild(li);
+      eel.adopt_device(deviceName)();
+    }
+  }
 
   // ===== INITIAL FUNCTION CALLS =====
   // Generate initial grid
