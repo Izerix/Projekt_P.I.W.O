@@ -79,9 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
       eel.adopt_device(deviceName)((response) => {
         if (response.success) {
           // Only add to the UI list if adoption was successful
-          const li = document.createElement("li")
-          li.textContent = deviceName
-          adoptedDevicesList.appendChild(li)
+          addDeviceToList(deviceName)
 
           // Show success notification
           showNotification(response.message, "success")
@@ -93,6 +91,48 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       showNotification("No device selected", "error")
     }
+  }
+
+  function addDeviceToList(deviceName) {
+    // Create list item
+    const li = document.createElement("li")
+
+    // Create device name span
+    const nameSpan = document.createElement("span")
+    nameSpan.textContent = deviceName
+    nameSpan.className = "device-name"
+    li.appendChild(nameSpan)
+
+    // Create connect button
+    const connectBtn = document.createElement("button")
+    connectBtn.className = "btn primary btn-sm"
+    connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect'
+
+    // Add click event to connect button
+    connectBtn.addEventListener("click", () => {
+      // Update current device display
+      const currentDevice = document.getElementById("current-device")
+
+      // Call the Python function to connect
+      eel.connect_device(deviceName)((response) => {
+        if (response.success) {
+          currentDevice.innerHTML = deviceName
+
+          // Show notification
+          showNotification(response.message, "success")
+
+          // Navigate to Grid Editor instead of Main Menu
+          document.querySelector('.nav-item[data-target="grid-editor"]').click()
+        } else {
+          showNotification("Failed to connect to device", "error")
+        }
+      })
+    })
+
+    li.appendChild(connectBtn)
+
+    // Add to the list
+    adoptedDevicesList.appendChild(li)
   }
 
   function showNotification(message, type) {
@@ -133,15 +173,130 @@ document.addEventListener("DOMContentLoaded", () => {
 
       cell.className = "grid-cell"
       cell.dataset.index = i
+
+      // Dodanie obsługi kliknięcia w kafelek gridu
+      cell.addEventListener("click", handleGridCellClick)
+
       gridPreview.appendChild(cell)
 
       gridData.push({
         index: i,
         class: "grid-cell",
         color: color,
+        deviceName: null, // Pole na nazwę urządzenia, null oznacza brak przypisania
+        assigned: false, // Flaga wskazująca, czy kafelek jest już przypisany
       })
     }
     updatePixelGrid()
+  }
+
+  // Modyfikacja funkcji handleGridCellClick, aby obsługiwała usuwanie przypisania
+  function handleGridCellClick(e) {
+    const index = Number.parseInt(this.dataset.index)
+
+    // Sprawdź, czy kafelek jest już przypisany
+    if (gridData[index].assigned) {
+      // Pokaż dialog potwierdzenia
+      showConfirmationDialog(`Czy chcesz usunąć urządzenie ${gridData[index].deviceName} z gridu?`, () => {
+        // Funkcja wykonywana po kliknięciu "Tak"
+        removeDeviceAssignment(index)
+      })
+      return
+    }
+
+    // Pobierz nazwę aktualnie połączonego urządzenia
+    eel.get_device_data()((deviceName) => {
+      if (deviceName) {
+        // Aktualizuj dane w gridData
+        gridData[index].deviceName = deviceName
+        gridData[index].assigned = true
+
+        // Aktualizuj wygląd kafelka - zamaluj na zielono
+        const cell = document.querySelector(`.grid-cell[data-index="${index}"]`)
+        if (cell) {
+          cell.classList.add("assigned")
+
+          // Dodaj tooltip z nazwą urządzenia
+          cell.title = deviceName
+        }
+
+        // Pokaż powiadomienie
+        showNotification(`Przypisano urządzenie: ${deviceName} do kafelka`, "success")
+      } else {
+        showNotification("Brak połączonego urządzenia", "error")
+      }
+    })
+  }
+
+  // Dodaj nową funkcję do wyświetlania dialogu potwierdzenia
+  function showConfirmationDialog(message, onConfirm) {
+    // Utwórz overlay (przyciemnione tło)
+    const overlay = document.createElement("div")
+    overlay.className = "dialog-overlay"
+    document.body.appendChild(overlay)
+
+    // Utwórz dialog
+    const dialog = document.createElement("div")
+    dialog.className = "confirmation-dialog"
+
+    // Dodaj treść dialogu
+    const messageElement = document.createElement("p")
+    messageElement.textContent = message
+    dialog.appendChild(messageElement)
+
+    // Dodaj przyciski
+    const buttonContainer = document.createElement("div")
+    buttonContainer.className = "dialog-buttons"
+
+    // Przycisk "Tak"
+    const yesButton = document.createElement("button")
+    yesButton.className = "btn primary"
+    yesButton.textContent = "Tak"
+    yesButton.addEventListener("click", () => {
+      // Usuń dialog
+      document.body.removeChild(overlay)
+      document.body.removeChild(dialog)
+
+      // Wykonaj akcję potwierdzenia
+      if (onConfirm) onConfirm()
+    })
+    buttonContainer.appendChild(yesButton)
+
+    // Przycisk "Nie"
+    const noButton = document.createElement("button")
+    noButton.className = "btn"
+    noButton.textContent = "Nie"
+    noButton.addEventListener("click", () => {
+      // Usuń dialog
+      document.body.removeChild(overlay)
+      document.body.removeChild(dialog)
+    })
+    buttonContainer.appendChild(noButton)
+
+    dialog.appendChild(buttonContainer)
+
+    // Dodaj dialog do body
+    document.body.appendChild(dialog)
+  }
+
+  // Dodaj nową funkcję do usuwania przypisania urządzenia
+  function removeDeviceAssignment(index) {
+    // Pobierz nazwę urządzenia przed usunięciem
+    const deviceName = gridData[index].deviceName
+
+    // Usuń przypisanie z gridData
+    gridData[index].deviceName = null
+    gridData[index].assigned = false
+
+    // Usuń klasę assigned z kafelka
+    const cell = document.querySelector(`.grid-cell[data-index="${index}"]`)
+    if (cell) {
+      cell.classList.remove("assigned")
+      cell.removeAttribute("title")
+    }
+
+    // Pokaż powiadomienie
+    showNotification(`Usunięto przypisanie urządzenia: ${deviceName} z kafelka`, "info")
   }
 
   function updatePixelGrid() {
@@ -217,6 +372,8 @@ document.addEventListener("DOMContentLoaded", () => {
         index: i,
         class: "grid-cell",
         color: color,
+        deviceName: cells[i].deviceName || null,
+        assigned: cells[i].assigned || false,
       })
     }
 
@@ -254,7 +411,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadDevices() {
-    console.log("TODO")
+    // Clear the current list
+    adoptedDevicesList.innerHTML = ""
+
+    // Call Python function to get the list of adopted devices
+    eel.get_adopted_devices()((devices) => {
+      if (devices && devices.length > 0) {
+        devices.forEach((device) => {
+          addDeviceToList(device)
+        })
+        showNotification("Devices loaded successfully", "success")
+      } else {
+        showNotification("No adopted devices found", "info")
+      }
+    })
   }
 
   async function saveGrid() {

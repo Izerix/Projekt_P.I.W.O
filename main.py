@@ -7,13 +7,19 @@ print(screen)
 eel.init("web")
 
 adoptedDevicesDict = {} # Global DICKTIONARY :D
+connectedDevice = None  # Aktualnie połączone urządzenie
 
 @eel.expose
 def connect_device(n):
+    global connectedDevice
+    connectedDevice = n
     print("Device: " + n + " connected.")
+    return {"success": True, "message": f"Connected to {n}"}
     
 @eel.expose
 def disconnect_device(n):
+    global connectedDevice
+    connectedDevice = None
     print("Device: " + n + " disconnected.")
     
 @eel.expose
@@ -28,6 +34,19 @@ def adopt_device(n):
     print("Device: " + n + " adopted.")
     print(adoptedDevicesDict)
     return {"success": True, "message": "Device successfully adopted"}
+
+@eel.expose
+def get_adopted_devices():
+    # Return list of adopted device names
+    return list(adoptedDevicesDict.keys())
+
+@eel.expose
+def get_device_data():
+    """Zwraca nazwę aktualnie połączonego urządzenia"""
+    if connectedDevice:
+        return connectedDevice
+    else:
+        return None
 
  # App starts HERE
 if __name__ == "__main__":
