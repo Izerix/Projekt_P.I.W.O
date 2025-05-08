@@ -1,11 +1,11 @@
 // Główny skrypt aplikacji
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   // GLOBAL VARIABLES
   let counter = 0;
   let gridData = [];
   let isPainting = false;
   let selectedColor = "#ff0000";
-  let currentDevice = document.getElementById("current-device");
+  const currentDevice = document.getElementById("current-device");
   const color = "#ffffff";
 
   // Navigation between elements in sidebar
@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Device Manager constants
   const addIPBtn = document.getElementById("add-ip-btn");
+  const addRandomIPs = document.getElementById("randomise-ip-btn");
   const loadDevicesBtn = document.getElementById("load-devices-btn");
   const adoptedDevicesList = document.getElementById("adopted-devices-list");
 
@@ -51,6 +52,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== REGULAR FUNCTIONS =====
 
+  // Declare eel, showConfirmationDialog, and removeDeviceAssignment
+  const eel = window.eel; // Assuming eel is exposed globally by eel.init()
+  function showConfirmationDialog(message, onConfirm) {
+    const modal = document.createElement("div");
+    modal.className = "confirmation-modal";
+    modal.innerHTML = `
+      <div class="modal-content">
+        <p>${message}</p>
+        <div class="modal-buttons">
+          <button id="confirm-btn" class="btn primary">Tak</button>
+          <button id="cancel-btn" class="btn secondary">Anuluj</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const confirmBtn = modal.querySelector("#confirm-btn");
+    const cancelBtn = modal.querySelector("#cancel-btn");
+
+    confirmBtn.addEventListener("click", () => {
+      onConfirm();
+      document.body.removeChild(modal);
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      document.body.removeChild(modal);
+    });
+  }
+
+  function removeDeviceAssignment(index) {
+    // Resetuj dane w gridData
+    gridData[index].deviceIP = null;
+    gridData[index].assigned = false;
+
+    // Aktualizuj wygląd kafelka - usuń zielony kolor i tooltip
+    const cell = document.querySelector(`.grid-cell[data-index="${index}"]`);
+    if (cell) {
+      cell.classList.remove("assigned");
+      cell.title = ""; // Usuń tooltip
+    }
+
+    // Pokaż powiadomienie
+    showNotification("Urządzenie usunięto z gridu", "success");
+  }
+
   function showNotification(message, type) {
     // Create notification element
     const notification = document.createElement("div");
@@ -69,9 +115,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 3000);
   }
 
-  function addDeviceToList(deviceIP) {
-    counter++; // Increment counter for unique class names
+  // Function to remove an IP from both UI and Python list
+  async function removeIP(deviceIP, listItem) {
+    // Call the Python function to remove the IP
+    eel.remove_device_from_dict(deviceIP)((response) => {
+      if (response.success) {
+        // Remove the list item from the UI
+        adoptedDevicesList.removeChild(listItem);
+        showNotification(`Device ${deviceIP} removed successfully`, "success");
 
+        // If this was the active device, reset the current device
+        if (currentDevice.innerHTML === deviceIP) {
+          currentDevice.innerHTML = "None";
+          showNotification(`Active device was removed`, "info");
+        }
+      } else {
+        showNotification(
+          `Failed to remove ${deviceIP}: ${response.message}`,
+          "error"
+        );
+      }
+    });
+  }
+
+  function addDeviceToList(deviceIP) {
     // Create list item
     const li = document.createElement("li");
 
@@ -82,11 +149,11 @@ document.addEventListener("DOMContentLoaded", function () {
     nameSpan.setAttribute("data-id", counter);
     li.appendChild(nameSpan);
 
-    // Add to the list
-    adoptedDevicesList.appendChild(li);
+    // Create button container for better alignment
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "button-container";
 
     // Create connect button
-
     const connectBtn = document.createElement("button");
     connectBtn.className = "btn primary btn-sm";
     connectBtn.setAttribute("data-id", counter);
@@ -94,24 +161,50 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add click event to connect button
     connectBtn.addEventListener("click", () => {
-      const id = connectBtn.dataset.id;
-      const span = document.querySelector(`span[data-id="${id}"]`);
-      const IPAdress = span.innerText;
+      const IPAdress = deviceIP;
       currentDevice.innerHTML = IPAdress;
 
-      // Navigate to Grid Editor instead of Main Menu
+      // Navigate to Grid Editor
       document.querySelector('.nav-item[data-target="grid-editor"]').click();
       showNotification(`${IPAdress} set as active`, "success");
     });
 
-    li.appendChild(connectBtn);
+    // Create remove button
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "btn danger btn-sm";
+    removeBtn.setAttribute("data-id", counter);
+    removeBtn.innerHTML = '<i class="fas fa-trash"></i> Remove';
+
+    // Add click event to remove button
+    removeBtn.addEventListener("click", () => {
+      // Show confirmation dialog
+      showConfirmationDialog(
+        `Are you sure you want to remove ${deviceIP}?`,
+        () => {
+          removeIP(deviceIP, li);
+        }
+      );
+    });
+
+    // Add buttons to container
+    buttonContainer.appendChild(connectBtn);
+    buttonContainer.appendChild(removeBtn);
+
+    // Add button container to list item
+    li.appendChild(buttonContainer);
+
+    // Add list item to list
+    adoptedDevicesList.appendChild(li);
+
+    // Increment counter for unique class names
+    counter++;
   }
 
   // ===== GRID EDITOR =====
   function generateGrid() {
     // Get current values
-    const columns = parseInt(columnsInput.value) || 1;
-    const rows = parseInt(rowsInput.value) || 1;
+    const columns = Number.parseInt(columnsInput.value) || 1;
+    const rows = Number.parseInt(rowsInput.value) || 1;
     // Reset gridData
     gridData = [];
 
@@ -145,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updatePixelGrid() {
     // Get current values
-    const columns = parseInt(columnsInput.value) || 1;
+    const columns = Number.parseInt(columnsInput.value) || 1;
 
     // Clear existing pixel grid
     pixelGrid.innerHTML = "";
@@ -169,14 +262,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function handleGridCellClick(e) {
     const index = Number.parseInt(this.dataset.index);
-
-    // Sprawdź, czy kafelek jest już przypisany
     if (gridData[index].assigned) {
-      // Pokaż dialog potwierdzenia
       showConfirmationDialog(
-        `Czy chcesz usunąć urządzenie ${gridData[index].deviceIP} z gridu?`,
+        `Do you want to remove ${gridData[index].deviceIP} from grid?`,
         () => {
-          // Funkcja wykonywana po kliknięciu "Tak"
           removeDeviceAssignment(index);
         }
       );
@@ -200,12 +289,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Pokaż powiadomienie
-      showNotification(
-        `Przypisano urządzenie: ${deviceIP} do kafelka`,
-        "success"
-      );
+      showNotification(`Device: ${deviceIP} assigned to grid cell`, "success");
     } else {
-      showNotification("Brak połączonego urządzenia", "error");
+      showNotification("No connected device detected", "error");
     }
   }
 
@@ -239,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function clearCells() {
-    let clearColor = "#ffffff";
+    const clearColor = "#ffffff";
     gridData.forEach((el) => {
       el.color = clearColor;
     });
@@ -281,13 +367,13 @@ document.addEventListener("DOMContentLoaded", function () {
     cell.addEventListener("mousedown", function (e) {
       e.preventDefault();
       isPainting = true;
-      const index = parseInt(this.dataset.index);
+      const index = Number.parseInt(this.dataset.index);
       paintCell(index);
     });
 
     cell.addEventListener("mousemove", function () {
       if (isPainting) {
-        const index = parseInt(this.dataset.index);
+        const index = Number.parseInt(this.dataset.index);
         paintCell(index);
       }
     });
@@ -295,24 +381,77 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== ASYNC FUNCTIONS =====
 
-  async function addDeviceIP() {
-    const deviceIP = document.getElementById("device-ip").value;
-    if (deviceIP !== "") {
-      // Call the Python function with the selected value and handle the response
-      eel.add_device_to_dict(deviceIP)((response) => {
+  // Modify the processIP function to accept a 'silent' option
+  async function processIP(ip, silent = false) {
+    return new Promise((resolve) => {
+      eel.add_device_to_dict(ip)((response) => {
         if (response.success) {
-          // Only add to the UI list if IP was correct
-          addDeviceToList(deviceIP);
-
-          // Show success notification
-          showNotification(response.message, "success");
+          // Only add to the UI list if IP was successfully added in Python
+          addDeviceToList(ip);
+          // Only show notification if not silent
+          if (!silent) {
+            showNotification(`Device ${ip} added successfully`, "success");
+          }
+          resolve(true);
         } else {
-          // Show error notification
-          showNotification(response.message, "error");
+          // Only show notification if not silent
+          if (!silent) {
+            showNotification(
+              `Failed to add ${ip}: ${response.message}`,
+              "error"
+            );
+          }
+          resolve(false);
         }
       });
+    });
+  }
+
+  // Update the addDevices function to use the silent option for random IPs
+  async function addDevices(options = { random: false }) {
+    if (options.random) {
+      // Handle random IP generation
+      const amountInput = document.getElementById("rand-ip-amount");
+      const amount = amountInput.value;
+
+      if (!amount || isNaN(amount) || amount <= 0) {
+        showNotification(
+          "Please enter a valid number of IPs to generate",
+          "error"
+        );
+        return;
+      }
+
+      let successCount = 0;
+      for (let i = 0; i < amount; i++) {
+        const randomIP = Array.from({ length: 4 }, () =>
+          Math.floor(Math.random() * 256)
+        ).join(".");
+
+        // Process IP silently (no individual notifications)
+        const success = await processIP(randomIP, true);
+        if (success) successCount++;
+      }
+
+      // Show only the summary notification
+      showNotification(
+        `Added ${successCount} of ${amount} random IPs`,
+        "success"
+      );
     } else {
-      showNotification("No device selected", "error");
+      // Handle single IP addition
+      const ipInput = document.getElementById("device-ip");
+      const ip = ipInput.value.trim();
+
+      if (!ip) {
+        showNotification("Please enter a device IP", "error");
+        return;
+      }
+
+      // Process single IP with notification (not silent)
+      await processIP(ip);
+      // Clear the input field after processing
+      ipInput.value = "";
     }
   }
 
@@ -330,8 +469,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function savePixels() {
     const pixelData = {
-      columns: parseInt(columnsInput.value),
-      rows: parseInt(rowsInput.value),
+      columns: Number.parseInt(columnsInput.value),
+      rows: Number.parseInt(rowsInput.value),
       cells: gridData,
     };
 
@@ -375,12 +514,13 @@ document.addEventListener("DOMContentLoaded", function () {
   clearBtn.addEventListener("click", clearCells);
   savePixelGridBtn.addEventListener("click", savePixels);
   loadPixelsBtn.addEventListener("click", getGridData);
-  addIPBtn.addEventListener("click", addDeviceIP);
+  addIPBtn.addEventListener("click", () => addDevices({ random: false }));
   loadDevicesBtn.addEventListener("click", loadDevices);
   saveGridBtn.addEventListener("click", saveGrid);
   loadGridBtn.addEventListener("click", loadGrid);
+  addRandomIPs.addEventListener("click", () => addDevices({ random: true }));
 
-  document.addEventListener("mouseup", function () {
+  document.addEventListener("mouseup", () => {
     isPainting = false;
   });
 

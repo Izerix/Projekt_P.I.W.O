@@ -6,7 +6,7 @@ print(screen)
 # Python code starts HERE
 eel.init("web")
 
-device_IP_list = [] # Global dictionary to store device IPs
+device_IP_list = [] # Global list to store device IPs
 
 @eel.expose
 def add_device_to_dict(n):
@@ -15,11 +15,24 @@ def add_device_to_dict(n):
         print("Device: " + n + " already added.")
         return {"success": False, "message": "Device already added"} 
     
-    # If not already adopted, add it to the dictionary
+    # If not already adopted, add it to the list
     device_IP_list.append(n)
     print("Device IP: " + n)
     print(device_IP_list)
     return {"success": True, "message": "Device successfully added"}
+
+@eel.expose
+def remove_device_from_dict(n):
+    # Check if device is in the list
+    if n in device_IP_list:
+        # Remove it from the list
+        device_IP_list.remove(n)
+        print("Device IP: " + n + " removed.")
+        print(device_IP_list)
+        return {"success": True, "message": "Device successfully removed"}
+    else:
+        print("Device: " + n + " not found in list.")
+        return {"success": False, "message": "Device not found in list"}
 
  # App starts HERE
 if __name__ == "__main__":
@@ -27,4 +40,3 @@ if __name__ == "__main__":
         eel.start('index.html', size=(int(screen.width/1.5), int(screen.height/1.5)))
     except (SystemExit, MemoryError, KeyboardInterrupt):
         pass
-    
