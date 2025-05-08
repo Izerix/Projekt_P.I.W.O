@@ -1,9 +1,11 @@
 // Główny skrypt aplikacji
 document.addEventListener("DOMContentLoaded", function () {
   // GLOBAL VARIABLES
+  let counter = 0;
   let gridData = [];
   let isPainting = false;
   let selectedColor = "#ff0000";
+  let currentDevice = document.getElementById("current-device");
   const color = "#ffffff";
 
   // Navigation between elements in sidebar
@@ -68,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function addDeviceToList(deviceIP) {
+    counter++; // Increment counter for unique class names
+
     // Create list item
     const li = document.createElement("li");
 
@@ -75,10 +79,32 @@ document.addEventListener("DOMContentLoaded", function () {
     const nameSpan = document.createElement("span");
     nameSpan.textContent = deviceIP;
     nameSpan.className = "device-IP";
+    nameSpan.setAttribute("data-id", counter);
     li.appendChild(nameSpan);
 
     // Add to the list
     adoptedDevicesList.appendChild(li);
+
+    // Create connect button
+
+    const connectBtn = document.createElement("button");
+    connectBtn.className = "btn primary btn-sm";
+    connectBtn.setAttribute("data-id", counter);
+    connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect';
+
+    // Add click event to connect button
+    connectBtn.addEventListener("click", () => {
+      const id = connectBtn.dataset.id;
+      const span = document.querySelector(`span[data-id="${id}"]`);
+      const IPAdress = span.innerText;
+      currentDevice.innerHTML = IPAdress;
+
+      // Navigate to Grid Editor instead of Main Menu
+      document.querySelector('.nav-item[data-target="grid-editor"]').click();
+      showNotification(`${IPAdress} set as active`, "success");
+    });
+
+    li.appendChild(connectBtn);
   }
 
   // ===== GRID EDITOR =====
@@ -101,12 +127,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
       cell.className = "grid-cell";
       cell.dataset.index = i;
+
+      cell.addEventListener("click", handleGridCellClick);
+
       gridPreview.appendChild(cell);
 
       gridData.push({
         index: i,
-        class: "grid-cell",
+        class: cell.className,
         color: color,
+        deviceIP: null,
+        assigned: false,
       });
     }
     updatePixelGrid();
@@ -135,6 +166,51 @@ document.addEventListener("DOMContentLoaded", function () {
       pixelGrid.appendChild(cell);
     }
   }
+
+  function handleGridCellClick(e) {
+    const index = Number.parseInt(this.dataset.index);
+
+    // Sprawdź, czy kafelek jest już przypisany
+    if (gridData[index].assigned) {
+      // Pokaż dialog potwierdzenia
+      showConfirmationDialog(
+        `Czy chcesz usunąć urządzenie ${gridData[index].deviceIP} z gridu?`,
+        () => {
+          // Funkcja wykonywana po kliknięciu "Tak"
+          removeDeviceAssignment(index);
+        }
+      );
+      return;
+    }
+
+    // Pobierz nazwę aktualnie połączonego urządzenia
+    const deviceIP = currentDevice.innerText;
+    if (deviceIP !== "None") {
+      // Aktualizuj dane w gridData
+      gridData[index].deviceIP = deviceIP;
+      gridData[index].assigned = true;
+
+      // Aktualizuj wygląd kafelka - zamaluj na zielono
+      const cell = document.querySelector(`.grid-cell[data-index="${index}"]`);
+      if (cell) {
+        cell.classList.add("assigned");
+
+        // Dodaj tooltip z nazwą urządzenia
+        cell.title = deviceIP;
+      }
+
+      // Pokaż powiadomienie
+      showNotification(
+        `Przypisano urządzenie: ${deviceIP} do kafelka`,
+        "success"
+      );
+    } else {
+      showNotification("Brak połączonego urządzenia", "error");
+    }
+  }
+
+  // ===== PIXEL CONTROL =====
+
   // Paint a cell with the selected color
   function paintCell(index) {
     // Color picker
