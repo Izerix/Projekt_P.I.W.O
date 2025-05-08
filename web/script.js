@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="modal-content">
         <p>${message}</p>
         <div class="modal-buttons">
-          <button id="confirm-btn" class="btn primary">Tak</button>
-          <button id="cancel-btn" class="btn secondary">Anuluj</button>
+          <button id="confirm-btn" class="btn primary">Yes</button>
+          <button id="cancel-btn" class="btn secondary">Exit</button>
         </div>
       </div>
     `
@@ -333,23 +333,52 @@ document.addEventListener("DOMContentLoaded", () => {
     // Pobierz nazwę aktualnie połączonego urządzenia
     const deviceIP = currentDevice.innerText
     if (deviceIP !== "None") {
-      // Aktualizuj dane w gridData
-      gridData[index].deviceIP = deviceIP
-      gridData[index].assigned = true
+      // Check if this device is already assigned to another cell
+      const existingAssignment = gridData.find((cell) => cell.assigned && cell.deviceIP === deviceIP)
 
-      // Aktualizuj wygląd kafelka - zamaluj na zielono
-      const cell = document.querySelector(`.grid-cell[data-index="${index}"]`)
-      if (cell) {
-        cell.classList.add("assigned")
+      if (existingAssignment) {
+        // Device is already assigned somewhere else
+        showConfirmationDialog(
+          `Device ${deviceIP} is already assigned to cell ${existingAssignment.index + 1}. Do you want to move it to this cell?`,
+          () => {
+            // Remove from old cell
+            const oldCell = document.querySelector(`.grid-cell[data-index="${existingAssignment.index}"]`)
+            if (oldCell) {
+              oldCell.classList.remove("assigned")
+              oldCell.title = ""
+            }
 
-        // Dodaj tooltip z nazwą urządzenia
-        cell.title = deviceIP
+            // Update data for old cell
+            existingAssignment.deviceIP = null
+            existingAssignment.assigned = false
+
+            // Assign to new cell
+            assignDeviceToCell(index, deviceIP)
+
+            showNotification(`Device ${deviceIP} moved to new cell`, "success")
+          },
+        )
+      } else {
+        // Device is not assigned yet, proceed with assignment
+        assignDeviceToCell(index, deviceIP)
+        showNotification(`Device: ${deviceIP} assigned to grid cell`, "success")
       }
-
-      // Pokaż powiadomienie
-      showNotification(`Device: ${deviceIP} assigned to grid cell`, "success")
     } else {
       showNotification("No connected device detected", "error")
+    }
+  }
+
+  // Helper function to assign a device to a grid cell
+  function assignDeviceToCell(index, deviceIP) {
+    // Update data in gridData
+    gridData[index].deviceIP = deviceIP
+    gridData[index].assigned = true
+
+    // Update cell appearance - color it green
+    const cell = document.querySelector(`.grid-cell[data-index="${index}"]`)
+    if (cell) {
+      cell.classList.add("assigned")
+      cell.title = deviceIP // Add tooltip with device name
     }
   }
 

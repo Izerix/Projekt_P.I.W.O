@@ -282,15 +282,22 @@ select {
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
-.grid-preview,
-.pixel-grid {
+/* Zmień style dla grid-preview i pixel-grid */
+.grid-preview {
   display: grid;
-  gap: 2px;
+  gap: var(--cell-gap);
   margin: 0 auto;
-  padding: 15px;
   box-sizing: content-box;
 }
 
+.pixel-grid {
+  display: grid;
+  gap: var(--cell-gap);
+  margin: 0 auto;
+  box-sizing: content-box;
+}
+
+/* Zmień style dla grid-cell i pixel-cell */
 .grid-cell,
 .pixel-cell {
   background-color: white;
@@ -336,28 +343,6 @@ select {
 
 .tools-card {
   width: 220px;
-}
-
-.pixel-grid {
-  display: grid;
-  gap: var(--cell-gap);
-  margin: 0 auto;
-  padding: 15px; /* Add padding around the grid */
-}
-
-.pixel-cell {
-  background-color: var(--white);
-  border: 1px solid var(--border);
-  min-width: 40px; /* Minimalny rozmiar komórki */
-  min-height: 40px;
-}
-
-.pixel {
-  background-color: white;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  min-width: 40px; /* Minimalny rozmiar piksela */
-  min-height: 40px;
 }
 
 .tool-section {
