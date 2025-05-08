@@ -10,13 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const navItems = document.querySelectorAll(".nav-item");
   const pages = document.querySelectorAll(".page");
 
-  // Main Menu constants
-  const connectBtn = document.getElementById("connect-btn");
-  const disconnectBtn = document.getElementById("disconnect-btn");
-  const adoptDeviceBtn = document.getElementById("adopt-device-btn");
-
   // Device Manager constants
-  const saveAsBtn = document.getElementById("save-as-btn");
+  const addIPBtn = document.getElementById("add-ip-btn");
   const loadDevicesBtn = document.getElementById("load-devices-btn");
   const adoptedDevicesList = document.getElementById("adopted-devices-list");
 
@@ -52,34 +47,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== FUNCTIONS =====
 
-  // ===== MAIN MENU =====
+  // ===== REGULAR FUNCTIONS =====
 
-  function connect_device() {
-    const selectedValue = document.getElementById("device-list").value;
-    const currentDevice = document.getElementById("current-device");
-    currentDevice.innerHTML = selectedValue;
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
 
-    // Call the Python function with the selected value
-    eel.connect_device(selectedValue)();
+    // Add to the body
+    document.body.appendChild(notification);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.classList.add("fade-out");
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 500);
+    }, 3000);
   }
 
-  function disconnect_device() {
-    const currentDevice = document.getElementById("current-device");
-    const deviceName = document.getElementById("current-device").innerHTML;
-    currentDevice.innerHTML = "None";
+  function addDeviceToList(deviceIP) {
+    // Create list item
+    const li = document.createElement("li");
 
-    // Call the Python function with the selected value
-    eel.disconnect_device(deviceName)();
-  }
+    // Create device name span
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = deviceIP;
+    nameSpan.className = "device-IP";
+    li.appendChild(nameSpan);
 
-  function adopt_device() {
-    const deviceName = document.getElementById("current-device").innerHTML;
-    if (deviceName !== "None") {
-      const li = document.createElement("li");
-      li.textContent = deviceName;
-      adoptedDevicesList.appendChild(li);
-      eel.adopt_device(deviceName)();
-    }
+    // Add to the list
+    adoptedDevicesList.appendChild(li);
   }
 
   // ===== GRID EDITOR =====
@@ -220,8 +219,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== ASYNC FUNCTIONS =====
 
-  async function saveDevices() {
-    console.log("TODO");
+  async function addDeviceIP() {
+    const deviceIP = document.getElementById("device-ip").value;
+    if (deviceIP !== "") {
+      // Call the Python function with the selected value and handle the response
+      eel.add_device_to_dict(deviceIP)((response) => {
+        if (response.success) {
+          // Only add to the UI list if IP was correct
+          addDeviceToList(deviceIP);
+
+          // Show success notification
+          showNotification(response.message, "success");
+        } else {
+          // Show error notification
+          showNotification(response.message, "error");
+        }
+      });
+    } else {
+      showNotification("No device selected", "error");
+    }
   }
 
   async function loadDevices() {
@@ -283,10 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
   clearBtn.addEventListener("click", clearCells);
   savePixelGridBtn.addEventListener("click", savePixels);
   loadPixelsBtn.addEventListener("click", getGridData);
-  connectBtn.addEventListener("click", connect_device);
-  disconnectBtn.addEventListener("click", disconnect_device);
-  adoptDeviceBtn.addEventListener("click", adopt_device);
-  saveAsBtn.addEventListener("click", saveDevices);
+  addIPBtn.addEventListener("click", addDeviceIP);
   loadDevicesBtn.addEventListener("click", loadDevices);
   saveGridBtn.addEventListener("click", saveGrid);
   loadGridBtn.addEventListener("click", loadGrid);

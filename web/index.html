@@ -43,23 +43,7 @@
         <section id="main-menu" class="page active">
           <h1>Main Menu</h1>
           <div class="card">
-            <h2>Available Devices:</h2>
-            <select id="device-list">
-              <option value="">Select a device...</option>
-              <option value="device1">Device 1</option>
-              <option value="device2">Device 2</option>
-            </select>
-            <div class="button-row">
-              <button id="connect-btn" class="btn primary">
-                <i class="fas fa-plug"></i> Connect
-              </button>
-              <button id="disconnect-btn" class="btn">
-                <i class="fas fa-unlink"></i> Disconnect
-              </button>
-            </div>
-            <button id="adopt-device-btn" class="btn accent">
-              <i class="fas fa-plus-circle"></i> Adopt Device
-            </button>
+            <!-- TODO: Dodać potem tu content -->
           </div>
         </section>
 
@@ -67,15 +51,11 @@
         <section id="device-manager" class="page">
           <h1>Device Manager</h1>
           <div class="card">
-            <h2>Adopted Devices:</h2>
+            <h2>Device IP list:</h2>
             <div class="input-group">
-              <input
-                type="text"
-                id="device-name"
-                placeholder="Device name..."
-              />
-              <button id="save-as-btn" class="btn primary">
-                <i class="fas fa-save"></i> Save As
+              <input type="text" id="device-ip" placeholder="Device ip..." />
+              <button id="add-ip-btn" class="btn accent">
+                <i class="fas fa-add"></i> Add IP
               </button>
             </div>
             <button id="load-devices-btn" class="btn">
