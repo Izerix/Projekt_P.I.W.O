@@ -87,6 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function removeDeviceAssignment(index) {
+    // Get the device IP before resetting
+    const deviceIP = gridData[index].deviceIP
+
     // Resetuj dane w gridData
     gridData[index].deviceIP = null
     gridData[index].assigned = false
@@ -98,8 +101,60 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.title = "" // Usuń tooltip
     }
 
+    // Update the device status in the list
+    if (deviceIP) {
+      deviceIP_onGrid(deviceIP, false)
+    }
+
     // Pokaż powiadomienie
     showNotification("Urządzenie usunięto z gridu", "success")
+  }
+
+  // Add the deviceIP_onGrid function after the removeDeviceAssignment function
+  function deviceIP_onGrid(deviceIP, isActive) {
+    // Find all device IP elements in the list
+    const deviceElements = document.querySelectorAll(".device-IP")
+
+    deviceElements.forEach((element) => {
+      if (element.textContent === deviceIP) {
+        // Get the parent li element
+        const listItem = element.closest("div")
+
+        // Check if status element already exists
+        let statusElement = listItem.querySelector(".device-status")
+
+        if (!statusElement) {
+          // Create status element if it doesn't exist
+          statusElement = document.createElement("span")
+          statusElement.className = "device-status"
+          // Insert after the device IP element
+          element.insertAdjacentElement("afterend", statusElement)
+        }
+
+        // Update the status text and styling
+        if (isActive) {
+          statusElement.textContent = "Active";
+          statusElement.style.color = "var(--danger)";
+          statusElement.style.backgroundColor = "#f8d7da";
+          statusElement.style.padding = "2px 6px";
+          statusElement.style.borderRadius = "20px";
+          statusElement.style.marginLeft = "5px";
+          statusElement.style.display = "inline-block";
+          statusElement.style.border = "2px solid var(--danger)";
+          statusElement.style.fontSize = "0.75rem";
+          statusElement.style.fontWeight = "600";
+          statusElement.style.lineHeight = "1";
+        } else {
+          statusElement.textContent = ""
+          statusElement.style.backgroundColor = ""
+          statusElement.style.padding = ""
+          statusElement.style.borderRadius = ""
+          statusElement.style.marginLeft = ""
+          statusElement.style.display = ""
+          statusElement.style.border = ""
+        }
+      }
+    })
   }
 
   function showNotification(message, type) {
@@ -145,11 +200,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const li = document.createElement("li")
 
     // Create device name span
+    const nameDivforSpans = document.createElement("div")
+
     const nameSpan = document.createElement("span")
     nameSpan.textContent = deviceIP
     nameSpan.className = "device-IP"
     nameSpan.setAttribute("data-id", counter)
-    li.appendChild(nameSpan)
+    nameDivforSpans.appendChild(nameSpan)
+    li.appendChild(nameDivforSpans)
+    
 
     // Create button container for better alignment
     const buttonContainer = document.createElement("div")
@@ -380,6 +439,9 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.classList.add("assigned")
       cell.title = deviceIP // Add tooltip with device name
     }
+
+    // Update the device status in the list
+    deviceIP_onGrid(deviceIP, true)
   }
 
   // ===== PIXEL CONTROL =====
