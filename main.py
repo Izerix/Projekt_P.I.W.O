@@ -31,7 +31,7 @@ def remove_device_from_dict(n):
     # Check if device is in the list
     if n in device_IP_list:
         # Remove it from the list
-        device_IP_list.remove(n)
+        device_IP_list.pop(n)
         print("Device IP: " + n + " removed.")
         print(device_IP_list)
         return {"success": True, "message": "Device successfully removed"}
