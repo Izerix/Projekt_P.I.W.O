@@ -226,7 +226,6 @@ select {
 .device-list-container {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  max-height: 200px;
   overflow-y: auto;
   margin-top: 1rem;
 }

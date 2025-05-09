@@ -6,7 +6,12 @@ print(screen)
 # Python code starts HERE
 eel.init("web")
 
-device_IP_list = [] # Global list to store device IPs
+device_IP_list = {} # Global dictionary to store device IPs
+
+@eel.expose
+def update_device_color(n, color, ip):
+    device_IP_list[ip] = {"index": n, "color": color}
+    print(device_IP_list)
 
 @eel.expose
 def add_device_to_dict(n):
@@ -16,7 +21,7 @@ def add_device_to_dict(n):
         return {"success": False, "message": "Device already added"} 
     
     # If not already adopted, add it to the list
-    device_IP_list.append(n)
+    device_IP_list[n] = {"index": None, "color": None}
     print("Device IP: " + n)
     print(device_IP_list)
     return {"success": True, "message": "Device successfully added"}
@@ -26,7 +31,7 @@ def remove_device_from_dict(n):
     # Check if device is in the list
     if n in device_IP_list:
         # Remove it from the list
-        device_IP_list.remove(n)
+        device_IP_list.pop(n)
         print("Device IP: " + n + " removed.")
         print(device_IP_list)
         return {"success": True, "message": "Device successfully removed"}
