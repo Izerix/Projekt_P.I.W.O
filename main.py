@@ -11,6 +11,7 @@ device_IP_list = {} # Global dictionary to store device IPs
 @eel.expose
 def update_device_color(n, color, ip):
     device_IP_list[ip] = {"index": n, "color": color}
+    print("====================================================")
     print(device_IP_list)
 
 @eel.expose
@@ -22,7 +23,7 @@ def add_device_to_dict(n):
     
     # If not already adopted, add it to the list
     device_IP_list[n] = {"index": None, "color": None}
-    print("Device IP: " + n)
+    print("====================================================")
     print(device_IP_list)
     return {"success": True, "message": "Device successfully added"}
 
@@ -33,6 +34,7 @@ def remove_device_from_dict(n):
         # Remove it from the list
         device_IP_list.pop(n)
         print("Device IP: " + n + " removed.")
+        print("====================================================")
         print(device_IP_list)
         return {"success": True, "message": "Device successfully removed"}
     else:
