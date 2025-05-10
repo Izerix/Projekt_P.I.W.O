@@ -736,14 +736,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function saveGrid() {
-    console.log("TODO");
-  }
-
-  async function loadGrid() {
-    console.log("TODO");
-  }
-
   async function savePixels() {
     const pixelData = {
       columns: Number.parseInt(columnsInput.value),
