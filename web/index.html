@@ -142,6 +142,80 @@
             </div>
           </div>
         </section>
+
+        <!-- Sekcja Animation Control -->
+        <section id="animation-control" class="page">
+          <h1>Animation Control</h1>
+          <div class="animation-editor">
+            <div class="card main-card">
+              <h2>Frame Animation</h2>
+              <div class="control-group">
+                <label for="frame-count">Number of Frames:</label>
+                <div class="input-group">
+                  <input type="number" id="frame-count" min="1" max="20" value="5" />
+                  <button id="generate-frames-btn" class="btn primary">
+                    <i class="fas fa-film"></i> Generate Frames
+                  </button>
+                </div>
+              </div>
+              
+              <div class="animation-controls">
+                <button id="prev-frame-btn" class="btn">
+                  <i class="fas fa-step-backward"></i> Previous
+                </button>
+                <span id="current-frame-display">Frame: 1 / 5</span>
+                <button id="next-frame-btn" class="btn">
+                  <i class="fas fa-step-forward"></i> Next
+                </button>
+                <button id="play-animation-btn" class="btn accent">
+                  <i class="fas fa-play"></i> Play
+                </button>
+                <div class="speed-controls">
+                  <span>Speed: </span>
+                  <button class="speed-btn" data-speed="0.5">x0.5</button>
+                  <button class="speed-btn active" data-speed="1.0">x1</button>
+                  <button class="speed-btn" data-speed="1.5">x1.5</button>
+                  <button class="speed-btn" data-speed="2.0">x2</button>
+                </div>
+              </div>
+              
+              <div class="frames-container">
+                <div id="frames-grid" class="frames-grid"></div>
+              </div>
+              
+              <div class="button-row">
+                <button id="save-animation-btn" class="btn primary">
+                  <i class="fas fa-save"></i> Save Animation
+                </button>
+                <button id="load-animation-btn" class="btn">
+                  <i class="fas fa-folder-open"></i> Load Animation
+                </button>
+                <button id="clear-animation-btn" class="btn danger">
+                  <i class="fas fa-trash"></i> Clear All
+                </button>
+              </div>
+            </div>
+
+            <div class="card tools-card">
+              <h2>Drawing Tools:</h2>
+              <div class="tool-section">
+                <h3>Color</h3>
+                <input type="color" id="animation-color-picker" value="#ff0000" />
+              </div>
+
+              <div class="tool-section">
+                <button id="animation-fill-btn" class="btn accent">Fill Frame</button>
+                <button id="animation-clear-btn" class="btn">Clear Frame</button>
+              </div>
+
+              <div class="tool-section">
+                <h3>Animation:</h3>
+                <button id="duplicate-frame-btn" class="btn primary">Duplicate Frame</button>
+                <button id="delete-frame-btn" class="btn danger">Delete Frame</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>         
 
@@ -154,7 +228,7 @@
       <div class="app-info">Device Control v1.0</div>
     </footer>
 
-    <script type="text/javascript" src="script.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="script.js"></script>
   </body>
 </html>
