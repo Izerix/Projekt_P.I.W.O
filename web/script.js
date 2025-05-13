@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let isPainting = false;
   let selectedColor = "#ff0000";
   const currentDevice = document.getElementById("current-device");
-  const color = "#ffffff";
+  const color = "#000000";
 
   // Navigation between elements in sidebar
   const navItems = document.querySelectorAll(".nav-item");
@@ -560,22 +560,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Update the fillCells function to also update the Python dictionary
   function fillCells() {
+    // Update UI
     gridData.forEach((el) => {
       el.color = selectedColor;
     });
     document.querySelectorAll(`.pixel-cell`).forEach((el) => {
       el.style.backgroundColor = selectedColor;
     });
+
+    // Update Python dictionary for all assigned devices
+    gridData.forEach((cell) => {
+      if (cell.assigned && cell.deviceIP) {
+        eel.update_device_color(cell.index, selectedColor, cell.deviceIP);
+      }
+    });
   }
 
+  // Update the clearCells function to also update the Python dictionary
   function clearCells() {
-    const clearColor = "#ffffff";
+    const clearColor = color;
+    // Update UI
     gridData.forEach((el) => {
       el.color = clearColor;
     });
     document.querySelectorAll(`.pixel-cell`).forEach((el) => {
       el.style.backgroundColor = clearColor;
+    });
+
+    // Update Python dictionary for all assigned devices
+    gridData.forEach((cell) => {
+      if (cell.assigned && cell.deviceIP) {
+        eel.update_device_color(cell.index, clearColor, cell.deviceIP);
+      }
     });
   }
 

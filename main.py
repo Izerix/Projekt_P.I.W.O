@@ -12,6 +12,7 @@ device_IP_list = {} # Global dictionary to store device IPs
 def update_device_color(n, color, ip):
     device_IP_list[ip] = {"index": n, "color": color}
     print(device_IP_list)
+    
 
 @eel.expose
 def add_device_to_dict(n):
