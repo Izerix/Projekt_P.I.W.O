@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Device Manager constants
   const addIPBtn = document.getElementById("add-ip-btn");
   const addRandomIPs = document.getElementById("randomise-ip-btn");
-  const loadDevicesBtn = document.getElementById("load-devices-btn");
   const adoptedDevicesList = document.getElementById("adopted-devices-list");
+  const autoConnectBtn = document.getElementById("auto-connect-btn");
 
   // Grid editor constants
   const columnsInput = document.getElementById("columns");
@@ -86,7 +86,71 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Add the autoConnect function after the addDevices function
+  function autoConnect() {
+    // Get all device IPs from the list
+    const deviceElements = document.querySelectorAll(".device-IP");
+    const deviceIPs = Array.from(deviceElements).map((el) => el.textContent);
+
+    // Get current grid dimensions
+    const columns = Number.parseInt(columnsInput.value) || 1;
+    const rows = Number.parseInt(rowsInput.value) || 1;
+    const totalCells = columns * rows;
+
+    // Check if we have any devices to connect
+    if (deviceIPs.length === 0) {
+      showNotification("No devices available to connect", "error");
+      return;
+    }
+
+    // Clear any existing assignments first
+    gridData.forEach((cell, index) => {
+      if (cell.assigned) {
+        removeDeviceAssignment(index);
+      }
+    });
+
+    // Determine how many devices we can assign (minimum of device count or grid capacity)
+    const devicesToAssign = Math.min(deviceIPs.length, totalCells);
+
+    // Assign devices to grid cells
+    let assignedCount = 0;
+    for (let i = 0; i < devicesToAssign; i++) {
+      // Set the current device to the one we're about to assign
+      currentDevice.innerHTML = deviceIPs[i];
+
+      // Assign the device to the corresponding grid cell
+      assignDeviceToCell(i, deviceIPs[i]);
+      assignedCount++;
+    }
+
+    // Show notification with results
+    if (assignedCount > 0) {
+      if (deviceIPs.length > totalCells) {
+        showNotification(
+          `Connected ${assignedCount} devices. ${
+            deviceIPs.length - totalCells
+          } devices couldn't be assigned due to grid capacity.`,
+          "info"
+        );
+      } else {
+        showNotification(
+          `Successfully connected ${assignedCount} devices to the grid.`,
+          "success"
+        );
+      }
+
+      // Navigate to Grid Editor to show the results
+      document.querySelector('.nav-item[data-target="grid-editor"]').click();
+    } else {
+      showNotification("Failed to connect any devices", "error");
+    }
+  }
+
   function removeDeviceAssignment(index) {
+    // Get the device IP before resetting
+    const deviceIP = gridData[index].deviceIP;
+
     // Resetuj dane w gridData
     gridData[index].deviceIP = null;
     gridData[index].assigned = false;
@@ -98,8 +162,60 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.title = ""; // Usuń tooltip
     }
 
+    // Update the device status in the list
+    if (deviceIP) {
+      deviceIP_onGrid(deviceIP, false);
+    }
+
     // Pokaż powiadomienie
     showNotification("Urządzenie usunięto z gridu", "success");
+  }
+
+  // Add the deviceIP_onGrid function after the removeDeviceAssignment function
+  function deviceIP_onGrid(deviceIP, isActive) {
+    // Find all device IP elements in the list
+    const deviceElements = document.querySelectorAll(".device-IP");
+
+    deviceElements.forEach((element) => {
+      if (element.textContent === deviceIP) {
+        // Get the parent li element
+        const listItem = element.closest("div");
+
+        // Check if status element already exists
+        let statusElement = listItem.querySelector(".device-status");
+
+        if (!statusElement) {
+          // Create status element if it doesn't exist
+          statusElement = document.createElement("span");
+          statusElement.className = "device-status";
+          // Insert after the device IP element
+          element.insertAdjacentElement("afterend", statusElement);
+        }
+
+        // Update the status text and styling
+        if (isActive) {
+          statusElement.textContent = "Active";
+          statusElement.style.color = "var(--danger)";
+          statusElement.style.backgroundColor = "#f8d7da";
+          statusElement.style.padding = "2px 6px";
+          statusElement.style.borderRadius = "20px";
+          statusElement.style.marginLeft = "5px";
+          statusElement.style.display = "inline-block";
+          statusElement.style.border = "2px solid var(--danger)";
+          statusElement.style.fontSize = "0.75rem";
+          statusElement.style.fontWeight = "600";
+          statusElement.style.lineHeight = "1";
+        } else {
+          statusElement.textContent = "";
+          statusElement.style.backgroundColor = "";
+          statusElement.style.padding = "";
+          statusElement.style.borderRadius = "";
+          statusElement.style.marginLeft = "";
+          statusElement.style.display = "";
+          statusElement.style.border = "";
+        }
+      }
+    });
   }
 
   function showNotification(message, type) {
@@ -122,6 +238,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function to remove an IP from both UI and Python list
   async function removeIP(deviceIP, listItem) {
+    // First check if this device is assigned to any grid cell and remove it
+    gridData.forEach((cell, index) => {
+      if (cell.assigned && cell.deviceIP === deviceIP) {
+        // Remove the device from this grid cell
+        removeDeviceAssignment(index);
+      }
+    });
+
     // Call the Python function to remove the IP
     eel.remove_device_from_dict(deviceIP)((response) => {
       if (response.success) {
@@ -148,11 +272,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const li = document.createElement("li");
 
     // Create device name span
+    const nameDivforSpans = document.createElement("div");
+
     const nameSpan = document.createElement("span");
     nameSpan.textContent = deviceIP;
     nameSpan.className = "device-IP";
     nameSpan.setAttribute("data-id", counter);
-    li.appendChild(nameSpan);
+    nameDivforSpans.appendChild(nameSpan);
+    li.appendChild(nameDivforSpans);
 
     // Create button container for better alignment
     const buttonContainer = document.createElement("div");
@@ -405,6 +532,9 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.classList.add("assigned");
       cell.title = deviceIP; // Add tooltip with device name
     }
+
+    // Update the device status in the list
+    deviceIP_onGrid(deviceIP, true);
   }
 
   // ===== PIXEL CONTROL =====
@@ -606,10 +736,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function loadDevices() {
-    console.log("TODO");
-  }
-
   async function saveGrid() {
     console.log("TODO");
   }
@@ -666,10 +792,10 @@ document.addEventListener("DOMContentLoaded", () => {
   savePixelGridBtn.addEventListener("click", savePixels);
   loadPixelsBtn.addEventListener("click", getGridData);
   addIPBtn.addEventListener("click", () => addDevices({ random: false }));
-  loadDevicesBtn.addEventListener("click", loadDevices);
   saveGridBtn.addEventListener("click", saveGrid);
   loadGridBtn.addEventListener("click", loadGrid);
   addRandomIPs.addEventListener("click", () => addDevices({ random: true }));
+  autoConnectBtn.addEventListener("click", autoConnect);
 
   // Color picker
   colorPicker.addEventListener("input", function () {

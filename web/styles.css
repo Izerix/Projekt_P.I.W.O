@@ -255,6 +255,7 @@ select {
 .button-container {
   display: flex;
   gap: 0.5rem;
+  justify-content: left;
 }
 
 /* Grid Editor */
