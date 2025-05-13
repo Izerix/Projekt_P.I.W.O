@@ -46,7 +46,7 @@
         <section id="main-menu" class="page active">
           <h1>Main Menu</h1>
           <div class="card">
-            <!-- TODO: Dodać potem tu content -->
+            <h2>Menu</h2>
           </div>
         </section>
 
@@ -126,19 +126,20 @@
             </div>
 
             <div class="card tools-card">
-              <h2>Tools:</h2>
+              <h2 id="cos">Tools</h2>
+              <h3>Color</h3>
               <div class="tool-section">
-                <h3>Color</h3>
                 <input type="color" id="color-picker" value="#ff0000" />
               </div>
 
+              <h3>Grid operations</h3>
               <div class="tool-section">
                 <button id="fill-btn" class="btn accent">Fill</button>
                 <button id="clear-btn" class="btn">Clear</button>
               </div>
 
+              <h3>File operations</h3>
               <div class="tool-section">
-                <h3>File:</h3>
                 <button id="save-pixels-btn" class="btn primary">Save</button>
                 <button id="load-pixels-btn" class="btn">Load</button>
               </div>
@@ -206,30 +207,29 @@
             </div>
 
             <div class="card tools-card">
-              <h2>Drawing Tools:</h2>
+              <h2 id="cos">Drawing Tools</h2>
+              <h3>Color</h3>
               <div class="tool-section">
-                <h3>Color</h3>
                 <input
                   type="color"
                   id="animation-color-picker"
+                  z
                   value="#ff0000"
                 />
               </div>
-
+              <h3>Grid operations</h3>
               <div class="tool-section">
-                <button id="animation-fill-btn" class="btn accent">
-                  Fill Frame
-                </button>
-                <button id="animation-clear-btn" class="btn">
-                  Clear Frame
-                </button>
+                <button id="animation-fill-btn" class="btn accent">Fill</button>
+                <button id="animation-clear-btn" class="btn">Clear</button>
               </div>
 
+              <h3>Animation</h3>
               <div class="tool-section">
-                <h3>Animation:</h3>
                 <button id="duplicate-frame-btn" class="btn primary">
                   Duplicate Frame
                 </button>
+              </div>
+              <div class="tool-section">
                 <button id="delete-frame-btn" class="btn danger">
                   Delete Frame
                 </button>
