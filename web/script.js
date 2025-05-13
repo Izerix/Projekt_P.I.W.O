@@ -941,6 +941,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
       updateFrameDisplay();
       renderCurrentFrame();
+
+      // Update the colors of each IP assigned to the grid
+      const currentFrame = frames[currentFrameIndex];
+
+      // Loop through all grid cells with assigned devices
+      gridData.forEach((cell) => {
+        if (cell.assigned && cell.deviceIP) {
+          // Find the corresponding cell in the current animation frame
+          const frameCellData = currentFrame.cells.find(
+            (c) => c.index === cell.index
+          );
+
+          if (frameCellData) {
+            // Update the device with the color from the current frame
+            eel.update_device_color(
+              cell.index,
+              frameCellData.color,
+              cell.deviceIP
+            );
+          }
+        }
+      });
     }, interval);
   }
 
@@ -1077,10 +1099,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const randomIP = Array.from({ length: 4 }, () =>
           Math.floor(Math.random() * 256)
         ).join(".");
-
-        // Process IP silently (no individual notifications)
-        const success = await processIP(randomIP, true);
-        if (success) successCount++;
+        addDeviceToList(randomIP);
+        successCount++;
       }
 
       // Show only the summary notification
