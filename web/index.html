@@ -29,7 +29,7 @@
             <i class="fas fa-server"></i> Device Manager
           </li>
           <li class="nav-item" data-target="grid-editor">
-            <i class="fas fa-th"></i> Grid Editor
+            <i class="fas fa-th"></i> Matrix Editor
           </li>
           <li class="nav-item" data-target="pixel-control">
             <i class="fas fa-paint-brush"></i> Pixel Control
@@ -43,22 +43,42 @@
         <section id="main-menu" class="page active">
           <h1>Main Menu</h1>
           <div class="card">
-            <h2>Available Devices:</h2>
-            <select id="device-list">
-              <option value="device1">Device 1</option>
-              <option value="device2">Device 2</option>
-            </select>
+            <h2>Add New Device:</h2>
+            <div class="input-group">
+              <input type="text" id="device-name-input" placeholder="Device name..." />
+              <input type="text" id="device-ip-input" placeholder="IP address..." />
+            </div>
+            <div class="input-group">
+              <div class="control-group">
+                <label for="device-rows">Grid Rows:</label>
+                <input type="number" id="device-rows-input" min="1" value="8" />
+              </div>
+              <div class="control-group">
+                <label for="device-columns">Grid Columns:</label>
+                <input type="number" id="device-columns-input" min="1" value="8" />
+              </div>
+            </div>
             <div class="button-row">
-              <button id="connect-btn" class="btn primary">
-                <i class="fas fa-plug"></i> Connect
-              </button>
-              <button id="disconnect-btn" class="btn">
-                <i class="fas fa-unlink"></i> Disconnect
+              <button id="adopt-device-btn" class="btn accent">
+                <i class="fas fa-plus-circle"></i> Add Device
               </button>
             </div>
-            <button id="adopt-device-btn" class="btn accent">
-              <i class="fas fa-plus-circle"></i> Adopt Device
-            </button>
+            <div class="info-box">
+              <i class="fas fa-info-circle"></i>
+              <p>Add devices to your collection with their grid dimensions. Each device has its own grid that can be controlled individually or as part of a matrix.</p>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h2>Device Collection:</h2>
+            <div class="button-row">
+              <button id="refresh-status-btn" class="btn">
+                <i class="fas fa-sync-alt"></i> Refresh Status
+              </button>
+            </div>
+            <div class="device-list-container">
+              <ul id="main-devices-list"></ul>
+            </div>
           </div>
         </section>
 
@@ -66,12 +86,17 @@
         <section id="device-manager" class="page">
           <h1>Device Manager</h1>
           <div class="card">
-            <h2>Adopted Devices:</h2>
+            <h2>Manage Devices:</h2>
             <div class="input-group">
               <input
                 type="text"
                 id="device-name"
                 placeholder="Device name..."
+              />
+              <input
+                type="text"
+                id="device-ip"
+                placeholder="IP address..."
               />
               <button id="save-as-btn" class="btn primary">
                 <i class="fas fa-save"></i> Save As
@@ -80,6 +105,11 @@
             <button id="load-devices-btn" class="btn">
               <i class="fas fa-download"></i> Load Devices
             </button>
+            <div class="button-row">
+              <button id="refresh-manager-status-btn" class="btn">
+                <i class="fas fa-sync-alt"></i> Refresh Status
+              </button>
+            </div>
             <div class="device-list-container">
               <ul id="adopted-devices-list"></ul>
             </div>
@@ -88,18 +118,23 @@
 
         <!-- Sekcja Grid Editor -->
         <section id="grid-editor" class="page">
-          <h1>Grid Editor</h1>
+          <h1>Matrix Editor</h1>
           <div class="card">
-            <h2>Create Grid:</h2>
+            <h2>Create Device Matrix:</h2>
             <div class="grid-controls">
               <div class="control-group">
-                <label for="columns">Columns:</label>
-                <input type="number" id="columns" min="1" value="5" />
+                <label for="columns">Matrix Columns:</label>
+                <input type="number" id="columns" min="1" value="3" />
               </div>
               <div class="control-group">
-                <label for="rows">Rows:</label>
-                <input type="number" id="rows" min="1" value="5" />
+                <label for="rows">Matrix Rows:</label>
+                <input type="number" id="rows" min="1" value="2" />
               </div>
+            </div>
+
+            <div class="info-box">
+              <i class="fas fa-info-circle"></i>
+              <p>Click on a matrix cell to assign a device from your collection. Each cell represents a physical device with its own grid dimensions.</p>
             </div>
 
             <div class="grid-container">
@@ -108,10 +143,10 @@
 
             <div class="button-row">
               <button id="save-grid-btn" class="btn primary">
-                <i class="fas fa-save"></i> Save Grid
+                <i class="fas fa-save"></i> Save Matrix
               </button>
               <button id="load-grid-btn" class="btn">
-                <i class="fas fa-folder-open"></i> Load Grid
+                <i class="fas fa-folder-open"></i> Load Matrix
               </button>
             </div>
           </div>
@@ -123,6 +158,17 @@
           <div class="pixel-editor">
             <div class="card main-card">
               <h2>Edit Pixels</h2>
+              <div class="device-selector">
+                <label for="device-select">Select Device:</label>
+                <select id="device-select">
+                  <option value="all">All Devices</option>
+                  <option value="matrix">Matrix View</option>
+                </select>
+              </div>
+              <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Paint pixels for the selected device or view the entire matrix. In Matrix View, you can see and edit all device grids at once.</p>
+              </div>
               <div class="pixel-container">
                 <div id="pixel-grid" class="pixel-grid"></div>
               </div>
@@ -145,6 +191,29 @@
                 <button id="save-pixels-btn" class="btn primary">Save</button>
                 <button id="load-pixels-btn" class="btn">Load</button>
               </div>
+              
+              <div class="tool-section">
+                <h3>Matrix Control:</h3>
+                <button id="send-to-devices-btn" class="btn primary">
+                  <i class="fas fa-paper-plane"></i> Send to Devices
+                </button>
+              </div>
+              <div class="tool-section">
+                <h3>Live Streaming:</h3>
+                <div class="streaming-controls">
+                  <div class="control-group">
+                    <label for="refresh-rate">Refresh Rate (fps):</label>
+                    <input type="number" id="refresh-rate" min="1" max="120" value="60">
+                  </div>
+                  <button id="start-streaming-btn" class="btn primary">
+                    <i class="fas fa-play"></i> Start Streaming
+                  </button>
+                  <button id="stop-streaming-btn" class="btn" disabled>
+                    <i class="fas fa-stop"></i> Stop Streaming
+                  </button>
+                </div>
+                <div id="streaming-status" class="streaming-status">Streaming: Inactive</div>
+              </div>
             </div>
           </div>
         </section>
@@ -153,9 +222,9 @@
 
     <!-- Stopka -->
     <footer>
-      <div class="active-device">
-        <span>Active Device:</span>
-        <span id="current-device">None</span>
+      <div class="matrix-info">
+        <span>Matrix Status:</span>
+        <span id="matrix-status">No matrix configured</span>
       </div>
       <div class="app-info">Device Control v1.0</div>
     </footer>
