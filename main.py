@@ -361,6 +361,14 @@ def check_device_status(device_info):
 def save_matrix_configuration(config):
     """Save the current matrix configuration"""
     global matrix_configuration
+    
+    # Validate rows and columns (limit to 20)
+    if config.get("rows", 0) > 20:
+        config["rows"] = 20
+    
+    if config.get("columns", 0) > 20:
+        config["columns"] = 20
+    
     matrix_configuration = config
     print("Matrix configuration saved:")
     print(json.dumps(config, indent=2))
@@ -757,6 +765,34 @@ def clean_status_cache():
 # Start the cache cleaning thread
 cache_cleaning_thread = threading.Thread(target=clean_status_cache, daemon=True)
 cache_cleaning_thread.start()
+
+# Add this function to the Python backend
+@eel.expose
+def remove_device(device_info):
+    """Remove a device from the collection"""
+    global adoptedDevicesDict
+    
+    # Create a unique key for the device using name and IP
+    device_key = f"{device_info['name']}_{device_info['ip']}"
+    
+    # Check if device exists in the dictionary
+    if device_key in adoptedDevicesDict:
+        # Remove from the dictionary
+        del adoptedDevicesDict[device_key]
+        
+        # Remove from WLED controllers if it exists
+        if device_key in wled_controllers:
+            del wled_controllers[device_key]
+        
+        # Remove from device grids data if it exists
+        if device_key in device_grids_data:
+            del device_grids_data[device_key]
+        
+        print(f"Device: {device_info['name']} ({device_info['ip']}) removed from collection.")
+        return {"success": True, "message": "Device successfully removed from collection"}
+    else:
+        print(f"Device: {device_info['name']} ({device_info['ip']}) not found in collection.")
+        return {"success": False, "message": "Device not found in collection"}
 
 # App starts HERE
 if __name__ == "__main__":

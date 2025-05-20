@@ -25,9 +25,6 @@
           <li class="nav-item active" data-target="main-menu">
             <i class="fas fa-home"></i> Main Menu
           </li>
-          <li class="nav-item" data-target="device-manager">
-            <i class="fas fa-server"></i> Device Manager
-          </li>
           <li class="nav-item" data-target="grid-editor">
             <i class="fas fa-th"></i> Matrix Editor
           </li>
@@ -45,8 +42,16 @@
           <div class="card">
             <h2>Add New Device:</h2>
             <div class="input-group">
-              <input type="text" id="device-name-input" placeholder="Device name..." />
-              <input type="text" id="device-ip-input" placeholder="IP address..." />
+              <input
+                type="text"
+                id="device-name-input"
+                placeholder="Device name..."
+              />
+              <input
+                type="text"
+                id="device-ip-input"
+                placeholder="IP address..."
+              />
             </div>
             <div class="input-group">
               <div class="control-group">
@@ -55,7 +60,12 @@
               </div>
               <div class="control-group">
                 <label for="device-columns">Grid Columns:</label>
-                <input type="number" id="device-columns-input" min="1" value="8" />
+                <input
+                  type="number"
+                  id="device-columns-input"
+                  min="1"
+                  value="8"
+                />
               </div>
             </div>
             <div class="button-row">
@@ -65,10 +75,14 @@
             </div>
             <div class="info-box">
               <i class="fas fa-info-circle"></i>
-              <p>Add devices to your collection with their grid dimensions. Each device has its own grid that can be controlled individually or as part of a matrix.</p>
+              <p>
+                Add devices to your collection with their grid dimensions. Each
+                device has its own grid that can be controlled individually or
+                as part of a matrix.
+              </p>
             </div>
           </div>
-          
+
           <div class="card">
             <h2>Device Collection:</h2>
             <div class="button-row">
@@ -78,40 +92,6 @@
             </div>
             <div class="device-list-container">
               <ul id="main-devices-list"></ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- Sekcja Device Manager -->
-        <section id="device-manager" class="page">
-          <h1>Device Manager</h1>
-          <div class="card">
-            <h2>Manage Devices:</h2>
-            <div class="input-group">
-              <input
-                type="text"
-                id="device-name"
-                placeholder="Device name..."
-              />
-              <input
-                type="text"
-                id="device-ip"
-                placeholder="IP address..."
-              />
-              <button id="save-as-btn" class="btn primary">
-                <i class="fas fa-save"></i> Save As
-              </button>
-            </div>
-            <button id="load-devices-btn" class="btn">
-              <i class="fas fa-download"></i> Load Devices
-            </button>
-            <div class="button-row">
-              <button id="refresh-manager-status-btn" class="btn">
-                <i class="fas fa-sync-alt"></i> Refresh Status
-              </button>
-            </div>
-            <div class="device-list-container">
-              <ul id="adopted-devices-list"></ul>
             </div>
           </div>
         </section>
@@ -134,7 +114,11 @@
 
             <div class="info-box">
               <i class="fas fa-info-circle"></i>
-              <p>Click on a matrix cell to assign a device from your collection. Each cell represents a physical device with its own grid dimensions.</p>
+              <p>
+                Click on a matrix cell to assign a device from your collection.
+                Each cell represents a physical device with its own grid
+                dimensions.
+              </p>
             </div>
 
             <div class="grid-container">
@@ -162,12 +146,15 @@
                 <label for="device-select">Select Device:</label>
                 <select id="device-select">
                   <option value="all">All Devices</option>
-                  <option value="matrix">Matrix View</option>
                 </select>
               </div>
               <div class="info-box">
                 <i class="fas fa-info-circle"></i>
-                <p>Paint pixels for the selected device or view the entire matrix. In Matrix View, you can see and edit all device grids at once.</p>
+                <p>
+                  Paint pixels for the selected device or view the entire
+                  matrix. In Matrix View, you can see and edit all device grids
+                  at once.
+                </p>
               </div>
               <div class="pixel-container">
                 <div id="pixel-grid" class="pixel-grid"></div>
@@ -191,7 +178,7 @@
                 <button id="save-pixels-btn" class="btn primary">Save</button>
                 <button id="load-pixels-btn" class="btn">Load</button>
               </div>
-              
+
               <div class="tool-section">
                 <h3>Matrix Control:</h3>
                 <button id="send-to-devices-btn" class="btn primary">
@@ -199,11 +186,32 @@
                 </button>
               </div>
               <div class="tool-section">
+                <h3>Zoom Controls:</h3>
+                <div class="zoom-controls">
+                  <button id="zoom-out-btn" class="btn">
+                    <i class="fas fa-search-minus"></i>
+                  </button>
+                  <span id="zoom-value">100%</span>
+                  <button id="zoom-in-btn" class="btn">
+                    <i class="fas fa-search-plus"></i>
+                  </button>
+                  <button id="reset-zoom-btn" class="btn">
+                    <i class="fas fa-sync-alt"></i> Reset
+                  </button>
+                </div>
+              </div>
+              <div class="tool-section">
                 <h3>Live Streaming:</h3>
                 <div class="streaming-controls">
                   <div class="control-group">
                     <label for="refresh-rate">Refresh Rate (fps):</label>
-                    <input type="number" id="refresh-rate" min="1" max="120" value="60">
+                    <input
+                      type="number"
+                      id="refresh-rate"
+                      min="1"
+                      max="120"
+                      value="60"
+                    />
                   </div>
                   <button id="start-streaming-btn" class="btn primary">
                     <i class="fas fa-play"></i> Start Streaming
@@ -212,7 +220,9 @@
                     <i class="fas fa-stop"></i> Stop Streaming
                   </button>
                 </div>
-                <div id="streaming-status" class="streaming-status">Streaming: Inactive</div>
+                <div id="streaming-status" class="streaming-status">
+                  Streaming: Inactive
+                </div>
               </div>
             </div>
           </div>

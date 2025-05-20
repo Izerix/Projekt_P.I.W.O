@@ -1059,3 +1059,50 @@ footer {
 .streaming-status.active {
   animation: streaming-pulse 1.5s infinite;
 }
+
+:root {
+  --pixel-cell-size: 40px;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.zoom-controls button {
+  padding: 5px 10px;
+}
+
+#zoom-value {
+  min-width: 50px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.tool-section .control-group {
+  margin-bottom: 0.75rem;
+}
+
+.tool-section .control-group input[type="number"] {
+  width: 100%;
+  padding: 0.3rem;
+}
+
+.pixel-grid-container {
+  padding: 10px;
+  border: 2px solid #4a6cf7;
+  border-radius: 4px;
+  background-color: rgba(74, 108, 247, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.device-grid {
+  margin-bottom: 30px;
+}
+
+.all-devices-container .device-grid {
+  margin: 20px;
+}
