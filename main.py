@@ -794,6 +794,90 @@ def remove_device(device_info):
         print(f"Device: {device_info['name']} ({device_info['ip']}) not found in collection.")
         return {"success": False, "message": "Device not found in collection"}
 
+# Add these functions to the Python backend for animation support
+
+@eel.expose
+def save_animation(animation_data):
+    """Save animation data to a file"""
+    try:
+        # Convert animation data to JSON string
+        animation_json = json.dumps(animation_data)
+        
+        # Save to file
+        with open(f"{animation_data['name']}.json", "w") as f:
+            f.write(animation_json)
+        
+        return {"success": True, "message": f"Animation saved to {animation_data['name']}.json"}
+    except Exception as e:
+        print(f"Error saving animation: {e}")
+        return {"success": False, "message": f"Error saving animation: {e}"}
+
+@eel.expose
+def load_animation(file_path):
+    """Load animation data from a file"""
+    try:
+        # Read from file
+        with open(file_path, "r") as f:
+            animation_json = f.read()
+        
+        # Parse JSON
+        animation_data = json.loads(animation_json)
+        
+        return {"success": True, "data": animation_data}
+    except Exception as e:
+        print(f"Error loading animation: {e}")
+        return {"success": False, "message": f"Error loading animation: {e}"}
+
+@eel.expose
+def play_animation_frame(frame_data, device_id=None):
+    """Send a single animation frame to devices"""
+    # This is similar to send_data_to_devices but optimized for animation playback
+    if device_id and device_id != "all":
+        # Find the device in the adopted devices
+        device = None
+        for d in adoptedDevicesDict.values():
+            if d.get('name') == device_id or f"{d.get('name')}_{d.get('ip')}" == device_id:
+                device = d
+                break
+        
+        if device:
+            # Check if device is online
+            device_status = check_device_status(device)
+            if device_status:
+                # Convert pixel data to RGB format
+                rgb_data = convert_pixel_data_to_rgb(frame_data, apply_gamma=True, gamma=2.8)
+                
+                # Get WLED controller for this device
+                controller = get_wled_controller(device)
+                
+                # Send data to the device
+                return controller.send_frame_ddp(rgb_data)
+            else:
+                return False
+        else:
+            return False
+    
+    # Otherwise, send to all devices in the matrix
+    success_count = 0
+    
+    # Check each cell in the matrix
+    for cell in matrix_configuration.get("cells", []):
+        if cell.get("assigned") and cell.get("deviceName"):
+            # Check if device is online
+            device_status = check_device_status(cell["deviceName"])
+            if device_status:
+                # Convert pixel data to RGB format
+                rgb_data = convert_pixel_data_to_rgb(frame_data, apply_gamma=True, gamma=2.8)
+                
+                # Get WLED controller for this device
+                controller = get_wled_controller(cell["deviceName"])
+                
+                # Send data to the device
+                if controller.send_frame_ddp(rgb_data):
+                    success_count += 1
+    
+    return success_count > 0
+
 # App starts HERE
 if __name__ == "__main__":
     try:

@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let deviceStatusCheckInterval = null; // Interval for checking device status
   let adoptedDevices = []; // Store all adopted devices
   let selectedDeviceId = "all"; // Currently selected device for pixel editing
+  let animationFrames = []; // Store animation frames
+  let currentFrameIndex = 0; // Current frame being edited
+  let isAnimationPlaying = false; // Animation playback state
+  let animationInterval = null; // Animation playback interval
+  let selectedAnimationDeviceId = "all"; // Currently selected device for animation
 
   // Navigation between elements in sidebar
   const navItems = document.querySelectorAll(".nav-item");
@@ -42,6 +47,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const stopStreamingBtn = document.getElementById("stop-streaming-btn");
   const streamingStatus = document.getElementById("streaming-status");
 
+  // Animation Control constants
+  const animationDeviceSelect = document.getElementById(
+    "animation-device-select"
+  );
+  const animationPreviewGrid = document.getElementById(
+    "animation-preview-grid"
+  );
+  const animationColorPicker = document.getElementById(
+    "animation-color-picker"
+  );
+  const timeline = document.getElementById("timeline");
+  const addFrameBtn = document.getElementById("add-frame-btn");
+  const deleteFrameBtn = document.getElementById("delete-frame-btn");
+  const playAnimationBtn = document.getElementById("play-animation-btn");
+  const pauseAnimationBtn = document.getElementById("pause-animation-btn");
+  const stopAnimationBtn = document.getElementById("stop-animation-btn");
+  const animationFpsInput = document.getElementById("animation-fps");
+  const saveAnimationBtn = document.getElementById("save-animation-btn");
+  const loadAnimationBtn = document.getElementById("load-animation-btn");
+  const sendAnimationBtn = document.getElementById("send-animation-btn");
+  const effectBtns = document.querySelectorAll(".effect-btn");
+
   // ===== NAVIGATION =====
   navItems.forEach((item) => {
     item.addEventListener("click", function () {
@@ -74,6 +101,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (target === "pixel-control") {
         updateDeviceSelector();
         updatePixelGridForSelectedDevice();
+      }
+
+      // Inside the existing click event handler for navigation items
+      if (target === "animation-control") {
+        updateAnimationDeviceSelector();
+        initializeAnimationEditor();
       }
     });
   });
@@ -1454,6 +1487,723 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     });
+  }
+
+  // ===== ANIMATION CONTROL =====
+
+  // Function to update the animation device selector
+  function updateAnimationDeviceSelector() {
+    // Clear existing options except "All Devices"
+    while (animationDeviceSelect.options.length > 1) {
+      animationDeviceSelect.remove(1);
+    }
+
+    // Add each device to the selector
+    adoptedDevices.forEach((device) => {
+      const option = document.createElement("option");
+      const deviceId = `${device.name}_${device.ip}`;
+      option.value = deviceId;
+      option.textContent = `${device.name} (${device.gridRows}×${device.gridColumns})`;
+      animationDeviceSelect.appendChild(option);
+    });
+  }
+
+  // Function to initialize the animation editor
+  function initializeAnimationEditor() {
+    // If no frames exist, create an initial frame
+    if (animationFrames.length === 0) {
+      createNewFrame();
+    }
+
+    // Update the timeline
+    updateTimeline();
+
+    // Update the preview grid
+    updateAnimationPreview();
+  }
+
+  // Function to create a new animation frame
+  function createNewFrame() {
+    // Get the device grid data for the selected device
+    if (selectedAnimationDeviceId === "all" && adoptedDevices.length > 0) {
+      // If "all" is selected, use the first device as a template
+      const firstDevice = adoptedDevices[0];
+      const deviceId = `${firstDevice.name}_${firstDevice.ip}`;
+
+      eel.get_device_grid_data(deviceId)((deviceGrid) => {
+        if (deviceGrid) {
+          // Create a deep copy of the grid data
+          const frameCopy = JSON.parse(JSON.stringify(deviceGrid));
+
+          // Add to animation frames
+          animationFrames.push(frameCopy);
+
+          // Set as current frame
+          currentFrameIndex = animationFrames.length - 1;
+
+          // Update the timeline
+          updateTimeline();
+
+          // Update the preview grid
+          updateAnimationPreview();
+        }
+      });
+    } else if (selectedAnimationDeviceId !== "all") {
+      // Get the specific device's grid data
+      eel.get_device_grid_data(selectedAnimationDeviceId)((deviceGrid) => {
+        if (deviceGrid) {
+          // Create a deep copy of the grid data
+          const frameCopy = JSON.parse(JSON.stringify(deviceGrid));
+
+          // Add to animation frames
+          animationFrames.push(frameCopy);
+
+          // Set as current frame
+          currentFrameIndex = animationFrames.length - 1;
+
+          // Update the timeline
+          updateTimeline();
+
+          // Update the preview grid
+          updateAnimationPreview();
+        }
+      });
+    } else {
+      // No devices available, create a default 8x8 grid
+      const defaultGrid = {
+        rows: 8,
+        columns: 8,
+        cells: [],
+      };
+
+      // Initialize cells with default color
+      for (let i = 0; i < 64; i++) {
+        defaultGrid.cells.push({
+          index: i,
+          color: "#ffffff",
+        });
+      }
+
+      // Add to animation frames
+      animationFrames.push(defaultGrid);
+
+      // Set as current frame
+      currentFrameIndex = animationFrames.length - 1;
+
+      // Update the timeline
+      updateTimeline();
+
+      // Update the preview grid
+      updateAnimationPreview();
+    }
+  }
+
+  // Function to update the timeline
+  function updateTimeline() {
+    // Clear existing timeline
+    timeline.innerHTML = "";
+
+    // Add each frame to the timeline
+    animationFrames.forEach((frame, index) => {
+      const frameElement = document.createElement("div");
+      frameElement.className = `timeline-frame ${
+        index === currentFrameIndex ? "active" : ""
+      }`;
+      frameElement.dataset.index = index;
+
+      // Create mini grid preview
+      const miniGrid = document.createElement("div");
+      miniGrid.className = "mini-grid";
+      miniGrid.style.gridTemplateColumns = `repeat(${frame.columns}, 1fr)`;
+      miniGrid.style.gridTemplateRows = `repeat(${frame.rows}, 1fr)`;
+
+      // Add cells to mini grid
+      frame.cells.forEach((cell) => {
+        const miniCell = document.createElement("div");
+        miniCell.className = "mini-cell";
+        miniCell.style.backgroundColor = cell.color;
+        miniGrid.appendChild(miniCell);
+      });
+
+      frameElement.appendChild(miniGrid);
+
+      // Add frame number
+      const frameNumber = document.createElement("div");
+      frameNumber.className = "frame-number";
+      frameNumber.textContent = `${index + 1}`;
+      frameElement.appendChild(frameNumber);
+
+      // Add click event to select frame
+      frameElement.addEventListener("click", () => {
+        // Set as current frame
+        currentFrameIndex = index;
+
+        // Update the timeline
+        updateTimeline();
+
+        // Update the preview grid
+        updateAnimationPreview();
+      });
+
+      timeline.appendChild(frameElement);
+    });
+  }
+
+  // Function to play the animation
+  function playAnimation() {
+    if (animationFrames.length < 2) {
+      showNotification("Animation needs at least 2 frames to play", "warning");
+      return;
+    }
+
+    // Stop any existing animation
+    stopAnimation();
+
+    // Update UI
+    isAnimationPlaying = true;
+    playAnimationBtn.disabled = true;
+    pauseAnimationBtn.disabled = false;
+    stopAnimationBtn.disabled = false;
+
+    // Update animation status
+    const animationStatus = document.getElementById("animation-status");
+    const fps = Number.parseInt(animationFpsInput.value) || 10;
+    animationStatus.textContent = `Animation: Playing (${fps} fps)`;
+    animationStatus.className = "animation-status active";
+
+    // Get the animation speed
+    const frameInterval = 1000 / fps;
+
+    // Start the animation interval
+    let playbackIndex = 0;
+    animationInterval = setInterval(() => {
+      // Update the current frame index for playback
+      playbackIndex = (playbackIndex + 1) % animationFrames.length;
+
+      // Update the preview with the current frame
+      updateAnimationPreviewWithFrame(playbackIndex);
+
+      // Send the frame to the device(s) in real-time
+      sendFrameToDevices(playbackIndex);
+    }, frameInterval);
+
+    showNotification("Animation playback started", "success");
+  }
+
+  // Function to pause the animation
+  function pauseAnimation() {
+    if (!isAnimationPlaying) return;
+
+    // Clear the animation interval
+    clearInterval(animationInterval);
+    animationInterval = null;
+
+    // Update UI
+    isAnimationPlaying = false;
+    playAnimationBtn.disabled = false;
+    pauseAnimationBtn.disabled = true;
+    stopAnimationBtn.disabled = false;
+
+    // Update animation status
+    const animationStatus = document.getElementById("animation-status");
+    animationStatus.textContent = `Animation: Paused`;
+    animationStatus.className = "animation-status inactive";
+
+    showNotification("Animation playback paused", "info");
+  }
+
+  // Function to stop the animation
+  function stopAnimation() {
+    if (!isAnimationPlaying && !animationInterval) return;
+
+    // Clear the animation interval
+    clearInterval(animationInterval);
+    animationInterval = null;
+
+    // Update UI
+    isAnimationPlaying = false;
+    playAnimationBtn.disabled = false;
+    pauseAnimationBtn.disabled = true;
+    stopAnimationBtn.disabled = true;
+
+    // Update animation status
+    const animationStatus = document.getElementById("animation-status");
+    animationStatus.textContent = `Animation: Inactive`;
+    animationStatus.className = "animation-status inactive";
+
+    // Reset to the first frame
+    currentFrameIndex = 0;
+    updateTimeline();
+    updateAnimationPreview();
+
+    showNotification("Animation playback stopped", "info");
+  }
+
+  // Function to update the animation preview with a specific frame
+  function updateAnimationPreviewWithFrame(frameIndex) {
+    // Get the frame
+    const frame = animationFrames[frameIndex];
+
+    if (!frame) return;
+
+    // Update the cells in the preview grid without recreating the entire grid
+    const cells = animationPreviewGrid.querySelectorAll(".pixel-cell");
+
+    if (cells.length === frame.cells.length) {
+      // Update existing cells
+      frame.cells.forEach((cellData, index) => {
+        if (index < cells.length) {
+          cells[index].style.backgroundColor = cellData.color;
+        }
+      });
+    } else {
+      // If cell count doesn't match, recreate the grid
+      updateAnimationPreview(frame);
+    }
+  }
+
+  // Modified function to update the animation preview
+  function updateAnimationPreview(specificFrame = null) {
+    // Clear existing preview grid
+    animationPreviewGrid.innerHTML = "";
+
+    // Get the frame to display
+    const frame = specificFrame || animationFrames[currentFrameIndex];
+
+    if (!frame) return;
+
+    // Create a container for the grid
+    const gridContainer = document.createElement("div");
+    gridContainer.className = "pixel-grid-container";
+    gridContainer.style.display = "grid";
+    gridContainer.style.gridTemplateColumns = `repeat(${frame.columns}, var(--pixel-cell-size))`;
+    gridContainer.style.gridTemplateRows = `repeat(${frame.rows}, var(--pixel-cell-size))`;
+    gridContainer.style.gap = "1px";
+    gridContainer.style.margin = "20px auto";
+    gridContainer.style.justifyContent = "center";
+
+    // Add cells to the grid
+    frame.cells.forEach((cell, index) => {
+      const pixelCell = document.createElement("div");
+      pixelCell.className = "pixel-cell";
+      pixelCell.dataset.index = index;
+      pixelCell.style.backgroundColor = cell.color;
+      pixelCell.style.minWidth = "var(--pixel-cell-size)";
+      pixelCell.style.minHeight = "var(--pixel-cell-size)";
+      pixelCell.style.border = "1px solid #dee2e6";
+
+      // Add paint listeners
+      pixelCell.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        isPainting = true;
+        const index = Number.parseInt(this.dataset.index);
+        paintAnimationCell(index);
+      });
+
+      pixelCell.addEventListener("mousemove", function () {
+        if (isPainting) {
+          const index = Number.parseInt(this.dataset.index);
+          paintAnimationCell(index);
+        }
+      });
+
+      gridContainer.appendChild(pixelCell);
+    });
+
+    animationPreviewGrid.appendChild(gridContainer);
+  }
+
+  // Function to send a frame to the device(s)
+  function sendFrameToDevices(frameIndex) {
+    const frame = animationFrames[frameIndex];
+
+    if (!frame) return;
+
+    // If a specific device is selected
+    if (selectedAnimationDeviceId !== "all") {
+      // Send to the specific device
+      eel.update_device_grid_data(
+        selectedAnimationDeviceId,
+        frame
+      )((success) => {
+        if (success) {
+          // Send the updated grid data to the device
+          eel.send_data_to_devices(
+            frame,
+            selectedAnimationDeviceId
+          )(() => {
+            // No need to show notifications during animation playback
+          });
+        }
+      });
+    } else {
+      // Send to all devices
+      // For each device, update its grid data with the frame data
+      adoptedDevices.forEach((device) => {
+        const deviceId = `${device.name}_${device.ip}`;
+
+        // Update the device grid data
+        eel.update_device_grid_data(
+          deviceId,
+          frame
+        )((success) => {
+          if (success) {
+            // Send the updated grid data to the device
+            eel.send_data_to_devices(
+              frame,
+              deviceId
+            )(() => {
+              // No need to show notifications during animation playback
+            });
+          }
+        });
+      });
+    }
+  }
+
+  // Save the animation
+  function saveAnimation() {
+    // Create a file name input dialog
+    const fileName = prompt("Enter a name for your animation:", "my-animation");
+
+    if (!fileName) return;
+
+    // Create the animation data object
+    const animationData = {
+      name: fileName,
+      frames: animationFrames,
+      fps: Number.parseInt(animationFpsInput.value) || 10,
+    };
+
+    // Convert to JSON string
+    const jsonData = JSON.stringify(animationData);
+
+    // Create a download link
+    const dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(jsonData);
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", fileName + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+
+    showNotification("Animation saved successfully", "success");
+  }
+
+  // Function to load an animation
+  function loadAnimation() {
+    // Create a file input element
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+
+    // Add change event listener
+    fileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          try {
+            // Parse the JSON data
+            const animationData = JSON.parse(e.target.result);
+
+            // Validate the data
+            if (!animationData.frames || !Array.isArray(animationData.frames)) {
+              throw new Error("Invalid animation data");
+            }
+
+            // Update the animation frames
+            animationFrames = animationData.frames;
+
+            // Update the animation speed
+            if (animationData.fps) {
+              animationFpsInput.value = animationData.fps;
+            }
+
+            // Reset to the first frame
+            currentFrameIndex = 0;
+
+            // Update the UI
+            updateTimeline();
+            updateAnimationPreview();
+
+            showNotification(
+              `Animation "${animationData.name}" loaded successfully`,
+              "success"
+            );
+          } catch (error) {
+            showNotification(
+              "Failed to load animation: Invalid file format",
+              "error"
+            );
+          }
+        };
+
+        reader.readAsText(file);
+      }
+    });
+
+    // Trigger the file input click
+    fileInput.click();
+  }
+
+  // Function to apply an effect to the current frame
+  function applyEffect(effectType) {
+    const frame = animationFrames[currentFrameIndex];
+
+    if (!frame) return;
+
+    switch (effectType) {
+      case "blink":
+        // Create a blinking effect (alternate between current colors and black)
+        const blinkFrames = [];
+
+        // Add current frame
+        blinkFrames.push(JSON.parse(JSON.stringify(frame)));
+
+        // Create black frame
+        const blackFrame = JSON.parse(JSON.stringify(frame));
+        blackFrame.cells.forEach((cell) => (cell.color = "#000000"));
+        blinkFrames.push(blackFrame);
+
+        // Add frames to animation
+        animationFrames = [
+          ...animationFrames.slice(0, currentFrameIndex + 1),
+          ...blinkFrames,
+          ...animationFrames.slice(currentFrameIndex + 1),
+        ];
+
+        break;
+
+      case "rainbow":
+        // Create a rainbow effect across multiple frames
+        const rainbowColors = [
+          "#ff0000", // Red
+          "#ff7f00", // Orange
+          "#ffff00", // Yellow
+          "#00ff00", // Green
+          "#0000ff", // Blue
+          "#4b0082", // Indigo
+          "#9400d3", // Violet
+        ];
+
+        // Create a frame for each color
+        const rainbowFrames = [];
+
+        rainbowColors.forEach((color) => {
+          const colorFrame = JSON.parse(JSON.stringify(frame));
+          colorFrame.cells.forEach((cell) => (cell.color = color));
+          rainbowFrames.push(colorFrame);
+        });
+
+        // Add frames to animation
+        animationFrames = [
+          ...animationFrames.slice(0, currentFrameIndex + 1),
+          ...rainbowFrames,
+          ...animationFrames.slice(currentFrameIndex + 1),
+        ];
+
+        break;
+
+      case "wave":
+        // Create a wave effect across the grid
+        const waveFrames = [];
+        const rows = frame.rows;
+        const cols = frame.columns;
+
+        // Create 5 frames for the wave effect
+        for (let i = 0; i < 5; i++) {
+          const waveFrame = JSON.parse(JSON.stringify(frame));
+
+          // For each cell, determine if it should be colored based on its position
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const index = r * cols + c;
+
+              // Create a diagonal wave pattern
+              if ((r + c + i) % 5 === 0) {
+                waveFrame.cells[index].color = animationColorPicker.value;
+              } else {
+                waveFrame.cells[index].color = "#000000";
+              }
+            }
+          }
+
+          waveFrames.push(waveFrame);
+        }
+
+        // Add frames to animation
+        animationFrames = [
+          ...animationFrames.slice(0, currentFrameIndex + 1),
+          ...waveFrames,
+          ...animationFrames.slice(currentFrameIndex + 1),
+        ];
+
+        break;
+
+      case "fade":
+        // Create a fade in/out effect
+        const fadeFrames = [];
+        const fadeSteps = 5;
+        const selectedColor = animationColorPicker.value;
+
+        // Convert hex to RGB
+        const hexToRgb = (hex) => {
+          const r = Number.parseInt(hex.slice(1, 3), 16);
+          const g = Number.parseInt(hex.slice(3, 5), 16);
+          const b = Number.parseInt(hex.slice(5, 7), 16);
+          return [r, g, b];
+        };
+
+        // Convert RGB to hex
+        const rgbToHex = (r, g, b) => {
+          return (
+            "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+          );
+        };
+
+        const rgb = hexToRgb(selectedColor);
+
+        // Fade in
+        for (let i = 0; i <= fadeSteps; i++) {
+          const fadeFrame = JSON.parse(JSON.stringify(frame));
+          const factor = i / fadeSteps;
+
+          const fadeColor = rgbToHex(
+            Math.round(rgb[0] * factor),
+            Math.round(rgb[1] * factor),
+            Math.round(rgb[2] * factor)
+          );
+
+          fadeFrame.cells.forEach((cell) => (cell.color = fadeColor));
+          fadeFrames.push(fadeFrame);
+        }
+
+        // Fade out
+        for (let i = fadeSteps; i >= 0; i--) {
+          const fadeFrame = JSON.parse(JSON.stringify(frame));
+          const factor = i / fadeSteps;
+
+          const fadeColor = rgbToHex(
+            Math.round(rgb[0] * factor),
+            Math.round(rgb[1] * factor),
+            Math.round(rgb[2] * factor)
+          );
+
+          fadeFrame.cells.forEach((cell) => (cell.color = fadeColor));
+          fadeFrames.push(fadeFrame);
+        }
+
+        // Add frames to animation
+        animationFrames = [
+          ...animationFrames.slice(0, currentFrameIndex + 1),
+          ...fadeFrames,
+          ...animationFrames.slice(currentFrameIndex + 1),
+        ];
+
+        break;
+    }
+
+    // Update the UI
+    updateTimeline();
+    updateAnimationPreview();
+
+    showNotification(`Applied ${effectType} effect`, "success");
+  }
+
+  // ===== EVENT LISTENERS FOR ANIMATION CONTROL =====
+
+  // Animation device selector change
+  animationDeviceSelect.addEventListener("change", function () {
+    selectedAnimationDeviceId = this.value;
+
+    // Reset animation frames
+    animationFrames = [];
+    currentFrameIndex = 0;
+
+    // Initialize the animation editor
+    initializeAnimationEditor();
+  });
+
+  // Add frame button
+  addFrameBtn.addEventListener("click", createNewFrame);
+
+  // Delete frame button
+  deleteFrameBtn.addEventListener("click", () => {
+    if (animationFrames.length <= 1) {
+      showNotification("Cannot delete the only frame", "error");
+      return;
+    }
+
+    // Remove the current frame
+    animationFrames.splice(currentFrameIndex, 1);
+
+    // Adjust current frame index if needed
+    if (currentFrameIndex >= animationFrames.length) {
+      currentFrameIndex = animationFrames.length - 1;
+    }
+
+    // Update the UI
+    updateTimeline();
+    updateAnimationPreview();
+
+    showNotification("Frame deleted", "info");
+  });
+
+  // Animation playback controls
+  playAnimationBtn.addEventListener("click", playAnimation);
+  pauseAnimationBtn.addEventListener("click", pauseAnimation);
+  stopAnimationBtn.addEventListener("click", stopAnimation);
+
+  // Animation FPS input
+  animationFpsInput.addEventListener("input", function () {
+    // Validate input
+    let value = Number.parseInt(this.value) || 10;
+    if (value < 1) value = 1;
+    if (value > 30) value = 30;
+    this.value = value;
+
+    // If animation is playing, restart it with the new FPS
+    if (isAnimationPlaying) {
+      playAnimation();
+    }
+  });
+
+  // Save and load animation
+  saveAnimationBtn.addEventListener("click", saveAnimation);
+  loadAnimationBtn.addEventListener("click", loadAnimation);
+
+  // Remove the sendAnimationBtn event listener since we're removing the button
+
+  // Effect buttons
+  effectBtns.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const effectType = this.dataset.effect;
+      applyEffect(effectType);
+    });
+  });
+
+  // Animation color picker event
+  animationColorPicker.addEventListener("input", () => {
+    // No immediate action needed, color is used when painting or applying effects
+  });
+
+  // Function to paint a cell in the animation preview
+  function paintAnimationCell(index) {
+    // Update color from color picker
+    selectedColor = animationColorPicker.value;
+
+    // Update the cell's color in the current frame
+    const frame = animationFrames[currentFrameIndex];
+    if (frame && frame.cells && frame.cells[index]) {
+      frame.cells[index].color = selectedColor;
+
+      // Update the animation preview
+      updateAnimationPreview();
+    }
   }
 
   // ===== EVENT LISTENERS =====

@@ -31,6 +31,9 @@
           <li class="nav-item" data-target="pixel-control">
             <i class="fas fa-paint-brush"></i> Pixel Control
           </li>
+          <li class="nav-item" data-target="animation-control">
+            <i class="fas fa-film"></i> Animation Control
+          </li>
         </ul>
       </nav>
 
@@ -222,6 +225,115 @@
                 </div>
                 <div id="streaming-status" class="streaming-status">
                   Streaming: Inactive
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sekcja Animation Control -->
+        <section id="animation-control" class="page">
+          <h1>Animation Control</h1>
+          <div class="animation-editor">
+            <div class="card main-card">
+              <h2>Animation Editor</h2>
+              <div class="device-selector">
+                <label for="animation-device-select">Select Device:</label>
+                <select id="animation-device-select">
+                  <option value="all">All Devices</option>
+                </select>
+              </div>
+              <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>
+                  Create animations by adding frames and adjusting timing. Use
+                  the timeline to preview and edit your animation.
+                </p>
+              </div>
+              <div class="animation-preview">
+                <div id="animation-preview-grid" class="pixel-grid"></div>
+              </div>
+              <div id="animation-status" class="animation-status inactive">
+                Animation: Inactive
+              </div>
+            </div>
+
+            <div class="card tools-card">
+              <h2>Animation Tools:</h2>
+              <div class="tool-section">
+                <h3>Color</h3>
+                <input
+                  type="color"
+                  id="animation-color-picker"
+                  value="#ff0000"
+                />
+              </div>
+
+              <div class="tool-section">
+                <h3>Timeline:</h3>
+                <div class="timeline-container">
+                  <div id="timeline" class="timeline"></div>
+                  <div class="timeline-controls">
+                    <button id="add-frame-btn" class="btn accent">
+                      <i class="fas fa-plus"></i> Add Frame
+                    </button>
+                    <button id="delete-frame-btn" class="btn">
+                      <i class="fas fa-trash"></i> Delete Frame
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tool-section">
+                <h3>Playback:</h3>
+                <div class="playback-controls">
+                  <button id="play-animation-btn" class="btn primary">
+                    <i class="fas fa-play"></i> Play
+                  </button>
+                  <button id="pause-animation-btn" class="btn" disabled>
+                    <i class="fas fa-pause"></i> Pause
+                  </button>
+                  <button id="stop-animation-btn" class="btn" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                  </button>
+                </div>
+                <div class="control-group">
+                  <label for="animation-fps">Animation Speed (fps):</label>
+                  <input
+                    type="number"
+                    id="animation-fps"
+                    min="1"
+                    max="30"
+                    value="10"
+                  />
+                </div>
+              </div>
+
+              <div class="tool-section">
+                <h3>Animation:</h3>
+                <button id="save-animation-btn" class="btn primary">
+                  <i class="fas fa-save"></i> Save Animation
+                </button>
+                <button id="load-animation-btn" class="btn">
+                  <i class="fas fa-folder-open"></i> Load Animation
+                </button>
+              </div>
+
+              <div class="tool-section">
+                <h3>Effects:</h3>
+                <div class="effects-list">
+                  <button class="btn effect-btn" data-effect="blink">
+                    Blink
+                  </button>
+                  <button class="btn effect-btn" data-effect="rainbow">
+                    Rainbow
+                  </button>
+                  <button class="btn effect-btn" data-effect="wave">
+                    Wave
+                  </button>
+                  <button class="btn effect-btn" data-effect="fade">
+                    Fade
+                  </button>
                 </div>
               </div>
             </div>
