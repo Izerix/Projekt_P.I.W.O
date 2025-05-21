@@ -1776,8 +1776,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const gridContainer = document.createElement("div");
     gridContainer.className = "pixel-grid-container";
     gridContainer.style.display = "grid";
-    gridContainer.style.gridTemplateColumns = `repeat(${frame.columns}, var(--pixel-cell-size))`;
-    gridContainer.style.gridTemplateRows = `repeat(${frame.rows}, var(--pixel-cell-size))`;
+    gridContainer.style.gridTemplateColumns = `repeat(${frame.columns}, var(--animation-pixel-cell-size))`;
+    gridContainer.style.gridTemplateRows = `repeat(${frame.rows}, var(--animation-pixel-cell-size))`;
     gridContainer.style.gap = "1px";
     gridContainer.style.margin = "20px auto";
     gridContainer.style.justifyContent = "center";
@@ -1788,8 +1788,8 @@ document.addEventListener("DOMContentLoaded", () => {
       pixelCell.className = "pixel-cell";
       pixelCell.dataset.index = index;
       pixelCell.style.backgroundColor = cell.color;
-      pixelCell.style.minWidth = "var(--pixel-cell-size)";
-      pixelCell.style.minHeight = "var(--pixel-cell-size)";
+      pixelCell.style.minWidth = "var(--animation-pixel-cell-size)";
+      pixelCell.style.minHeight = "var(--animation-pixel-cell-size)";
       pixelCell.style.border = "1px solid #dee2e6";
 
       // Add paint listeners
@@ -2205,6 +2205,104 @@ document.addEventListener("DOMContentLoaded", () => {
       updateAnimationPreview();
     }
   }
+
+  // Animation fill and clear buttons
+  const animationFillBtn = document.getElementById("animation-fill-btn");
+  const animationClearBtn = document.getElementById("animation-clear-btn");
+
+  animationFillBtn.addEventListener("click", fillAnimationCells);
+  animationClearBtn.addEventListener("click", clearAnimationCells);
+
+  // Function to fill all cells in the current animation frame
+  function fillAnimationCells() {
+    // Get the current frame
+    const frame = animationFrames[currentFrameIndex];
+    if (!frame) return;
+
+    // Update color from color picker
+    const color = animationColorPicker.value;
+
+    // Update all cells in the frame
+    frame.cells.forEach((cell) => {
+      cell.color = color;
+    });
+
+    // Update the animation preview
+    updateAnimationPreview();
+
+    showNotification("All cells filled with selected color", "success");
+  }
+
+  // Function to clear all cells in the current animation frame
+  function clearAnimationCells() {
+    // Get the current frame
+    const frame = animationFrames[currentFrameIndex];
+    if (!frame) return;
+
+    // Set all cells to default color
+    frame.cells.forEach((cell) => {
+      cell.color = "#ffffff";
+    });
+
+    // Update the animation preview
+    updateAnimationPreview();
+
+    showNotification("All cells cleared", "success");
+  }
+
+  // Animation zoom controls
+  const animationZoomOutBtn = document.getElementById("animation-zoom-out-btn");
+  const animationZoomInBtn = document.getElementById("animation-zoom-in-btn");
+  const animationZoomResetBtn = document.getElementById(
+    "animation-zoom-reset-btn"
+  );
+  const animationZoomValue = document.getElementById("animation-zoom-value");
+
+  // Set initial CSS variable for animation pixel cell size
+  document.documentElement.style.setProperty(
+    "--animation-pixel-cell-size",
+    "40px"
+  );
+
+  animationZoomOutBtn.addEventListener("click", () => {
+    const currentSize = Number.parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue(
+        "--animation-pixel-cell-size"
+      )
+    );
+    if (currentSize > 10) {
+      document.documentElement.style.setProperty(
+        "--animation-pixel-cell-size",
+        currentSize - 5 + "px"
+      );
+      animationZoomValue.textContent =
+        Math.round(((currentSize - 5) / 40) * 100) + "%";
+    }
+  });
+
+  animationZoomInBtn.addEventListener("click", () => {
+    const currentSize = Number.parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue(
+        "--animation-pixel-cell-size"
+      )
+    );
+    if (currentSize < 100) {
+      document.documentElement.style.setProperty(
+        "--animation-pixel-cell-size",
+        currentSize + 5 + "px"
+      );
+      animationZoomValue.textContent =
+        Math.round(((currentSize + 5) / 40) * 100) + "%";
+    }
+  });
+
+  animationZoomResetBtn.addEventListener("click", () => {
+    document.documentElement.style.setProperty(
+      "--animation-pixel-cell-size",
+      "40px"
+    );
+    animationZoomValue.textContent = "100%";
+  });
 
   // ===== EVENT LISTENERS =====
   // Main Menu

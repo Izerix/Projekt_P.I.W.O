@@ -12,6 +12,7 @@
   --transition: all 0.3s ease;
   --grid-cell-size: 80px; /* Zwiększony domyślny rozmiar komórki dla Grid Editor */
   --pixel-cell-size: 40px; /* Zwiększony domyślny rozmiar komórki dla Pixel Control */
+  --animation-pixel-cell-size: 40px; /* Rozmiar komórki dla Animation Control */
   --cell-gap: 4px; /* Odstęp między komórkami */
   --gradient-start: #f5f7fa;
   --gradient-end: #c3cfe2;
@@ -475,7 +476,8 @@ select {
   margin-bottom: 1.5rem;
 }
 
-#color-picker {
+#color-picker,
+#animation-color-picker {
   width: 100%;
   height: 40px;
   padding: 0;
